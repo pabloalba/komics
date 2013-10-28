@@ -3,20 +3,17 @@ package net.kaleidos.comicsmagic;
 import java.io.File;
 import java.util.ArrayList;
 
+import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.view.View;
-import android.view.View.OnClickListener;
-import android.widget.AdapterView;
-import android.widget.ImageView;
 
 public class PageActivity extends Activity {
 		ArrayList<File> files;
-		ImageView imageView;
+		TouchImageView touchImageView;
 		int number = 0;
 	 
 		@Override
@@ -27,9 +24,15 @@ public class PageActivity extends Activity {
 			String fileName = i.getStringExtra("file");
 			this.files = utils.getAllImagesFile(fileName);
 			
-			setContentView(R.layout.page_view);
-			imageView = (ImageView) findViewById(R.id.imageView1);
 			
+			touchImageView = new TouchImageView(this);
+			setContentView(touchImageView);
+			
+		        
+			
+			
+			
+			/*
 			imageView.setOnClickListener(new OnClickListener() {
 				@Override
 				public void onClick(View arg0) {
@@ -37,7 +40,7 @@ public class PageActivity extends Activity {
 					showPage(number);
 				}
 			});
-			
+			*/
 			
 			
 			showPage(number);	 
@@ -45,7 +48,8 @@ public class PageActivity extends Activity {
 		
 		private void showPage(int number){
 			Bitmap bmImg = BitmapFactory.decodeFile(files.get(number).getAbsolutePath());
-	        imageView.setImageBitmap(bmImg);
+			touchImageView.setImageBitmap(bmImg);
+			touchImageView.setMaxZoom(4f);	        
 		}
 		
 		
