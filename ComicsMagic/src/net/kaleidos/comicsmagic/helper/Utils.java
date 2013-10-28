@@ -4,10 +4,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
 import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
 
 import android.annotation.SuppressLint;
@@ -112,31 +117,96 @@ public class Utils {
 		File outputFile = null;
 		try {
 			File outputDir = _context.getCacheDir(); // temp dir
-			FileInputStream fin = new FileInputStream(file);
-			ZipInputStream zin = new ZipInputStream(fin);
-			ZipEntry ze = null;
-			boolean ok = false;
-			while (((ze = zin.getNextEntry()) != null) && (!ok)) {
-				if (!ze.isDirectory()
-						&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
-					outputFile = File.createTempFile("img_", "img", outputDir);
+			File thumbnailDir = new File (outputDir.getAbsolutePath() + File.separator + "thumbnail");
+			thumbnailDir.mkdir();
+			
+			outputFile = new File(thumbnailDir + File.separator + file.getName() + ".jpg");
+			if (!outputFile.exists()) {
+				ZipFile zipFile = new ZipFile(file);
+				Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
+				String firstImage = "ZZ";
+				ZipEntry firstImageEntry = null;
+				while (zipEntries.hasMoreElements()) {
+					ZipEntry ze = ((ZipEntry)zipEntries.nextElement());
+					if (!ze.isDirectory()
+							&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
+						if (firstImage.compareTo(ze.getName()) > 0){
+							firstImage = ze.getName();
+							firstImageEntry = ze;
+						}
+					}
+				}
+				
+				if (firstImageEntry != null) {
+					InputStream in = zipFile.getInputStream(firstImageEntry);					
 					FileOutputStream fout = new FileOutputStream(outputFile);
-
-					Bitmap imageBitmap = BitmapFactory.decodeStream(zin);
-
+					Bitmap imageBitmap = BitmapFactory.decodeStream(in);
 					imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 142,
 							200, false);
-
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 					fout.write(baos.toByteArray());
-
-					zin.closeEntry();
 					fout.close();
-					ok = true;
+					in.close();
 				}
 			}
-			zin.close();
+		} catch (Exception e) {
+			Log.e("Decompress", "unzip", e);
+		}
+		return outputFile;
+
+	}
+	
+	public File getFirstImageFile2(File file) {
+		File outputFile = null;
+		try {
+			File outputDir = _context.getCacheDir(); // temp dir
+			File thumbnailDir = new File (outputDir.getAbsolutePath() + File.separator + "thumbnail");
+			thumbnailDir.mkdir();
+			
+			outputFile = new File(thumbnailDir + File.separator + file.getName() + ".jpg");
+			if (!outputFile.exists()) {
+				
+				// Get the first image of the zip file
+				FileInputStream fin = new FileInputStream(file);
+				ZipInputStream zin = new ZipInputStream(fin);
+				ZipEntry ze = null;
+				String firstImage = "ZZ";
+				while ((ze = zin.getNextEntry()) != null) {
+					if (!ze.isDirectory()
+							&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
+						if (firstImage.compareTo(ze.getName()) > 0){
+							firstImage = ze.getName();
+						}
+					}
+				}
+				zin.close();
+				
+				
+				//Now, extract that image
+				if (!firstImage.equals("")){
+					fin = new FileInputStream(file);
+					zin = new ZipInputStream(fin);
+					ze = zin.getNextEntry();
+					while (!ze.getName().equals(firstImage)){
+						ze = zin.getNextEntry();
+					}
+					FileOutputStream fout = new FileOutputStream(outputFile);
+	
+					Bitmap imageBitmap = BitmapFactory.decodeStream(zin);
+	
+					imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 142,
+							200, false);
+	
+					ByteArrayOutputStream baos = new ByteArrayOutputStream();
+					imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+					fout.write(baos.toByteArray());
+	
+					zin.closeEntry();
+					fout.close();
+					zin.close();
+				}
+			}
 		} catch (Exception e) {
 			Log.e("Decompress", "unzip", e);
 		}
@@ -144,38 +214,74 @@ public class Utils {
 
 	}
 
-	public ArrayList<File> getAllImagesFile(String fileName) {
-		ArrayList<File> files = new ArrayList<File>();
+	public ArrayList<String> getAllImagesFile(String fileName) {
+		ArrayList<String> fileNames = new ArrayList<String>();
 		try {
-			File outputDir = _context.getCacheDir(); // temp dir
+			File cacheDir = _context.getCacheDir(); // temp dir
+			
+			File comicsDir = new File (cacheDir.getAbsolutePath() + File.separator + "comics");
+			comicsDir.mkdir();
+			
+			//Delete old comics
+			deleteOldComics(comicsDir);
+			
 			File file = new File(fileName);
-			FileInputStream fin = new FileInputStream(file);
-			ZipInputStream zin = new ZipInputStream(fin);
-			ZipEntry ze = null;
-			while ((ze = zin.getNextEntry()) != null) {
-				if (!ze.isDirectory()
-						&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
-					File outputFile = File.createTempFile("img_", "img",
-							outputDir);
-					FileOutputStream fout = new FileOutputStream(outputFile);
-
-					byte[] buffer = new byte[4096];
-					for (int c = zin.read(buffer); c != -1; c = zin
-							.read(buffer)) {
-						fout.write(buffer, 0, c);
+			File outputDir = new File (comicsDir.getAbsolutePath() + File.separator + file.getName());
+			if (!outputDir.exists()) {
+				outputDir.mkdir();
+				FileInputStream fin = new FileInputStream(file);
+				ZipInputStream zin = new ZipInputStream(fin);
+				ZipEntry ze = null;
+				while ((ze = zin.getNextEntry()) != null) {
+					if (!ze.isDirectory()
+							&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
+						File outputFile = new File (outputDir.getAbsolutePath() + File.separator + ze.getName());
+						FileOutputStream fout = new FileOutputStream(outputFile);
+	
+						byte[] buffer = new byte[4096];
+						for (int c = zin.read(buffer); c != -1; c = zin
+								.read(buffer)) {
+							fout.write(buffer, 0, c);
+						}
+	
+						zin.closeEntry();
+						fout.close();
+					
+						fileNames.add(outputFile.getAbsolutePath());
 					}
-
-					zin.closeEntry();
-					fout.close();
-					files.add(outputFile);
+				}
+				zin.close();
+			} else {
+				File[] files = outputDir.listFiles();
+				for (int i=0; i<files.length;i++){
+					fileNames.add(files[i].getAbsolutePath());
 				}
 			}
-			zin.close();
 		} catch (Exception e) {
 			Log.e("Decompress", "unzip", e);
 		}
-		return files;
+		return fileNames;
 
+	}
+	
+	/**
+	 * Delete comics cache. If there are more than 3 comics stored, delete
+	 * the oldests
+	 * @param comicsDir
+	 */
+	public void deleteOldComics(File comicsDir){
+		File[] files = comicsDir.listFiles();
+		if (files.length > 3) {
+			Arrays.sort(files, new Comparator<File>(){
+			    public int compare(File f1, File f2)
+			    {
+			        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+			    } });
+			for (int i =0; i<files.length-3;i++){
+				deleteDir(files[i]);
+			}
+		}
+		
 	}
 
 	public void deleteCache() {
