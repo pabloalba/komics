@@ -18,13 +18,13 @@ import java.util.zip.ZipInputStream;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
-import android.widget.Toast;
 
 public class Utils {
 	private Context _context;
@@ -35,50 +35,54 @@ public class Utils {
 	}
 
 	// Reading file paths from SDCard
-	public ArrayList<File> getFiles() {
-		ArrayList<File> files = new ArrayList<File>();
+	public ArrayList<File> getFiles(File directory) {
+		ArrayList<File> files = new ArrayList<File>();	
+		
+		// getting list of file paths
+		File[] listFiles = directory.listFiles();
 
-		File directory = new File(
-				android.os.Environment.getExternalStorageDirectory()
-						+ File.separator + AppConstant.PHOTO_ALBUM);
+		// Check for count
+		if (listFiles.length > 0) {
+			
+			
+			Arrays.sort(listFiles, new Comparator<File>(){
+		    public int compare(File f1, File f2)
+		    {
+		    	//First folders
+		    	if (f1.isDirectory() && !f2.isDirectory()){
+		    		return -1;
+		    	}
+		    	if (!f1.isDirectory() && f2.isDirectory()){
+		    		return 1;
+		    	} 
+		    	
+		        return f1.getName().compareTo(f2.getName());
+		    } });
+			
 
-		// check for directory
-		if (directory.isDirectory()) {
-			// getting list of file paths
-			File[] listFiles = directory.listFiles();
+			// loop through all files
+			for (int i = 0; i < listFiles.length; i++) {
 
-			// Check for count
-			if (listFiles.length > 0) {
+				// get file path
+				String filePath = listFiles[i].getAbsolutePath();
 
-				// loop through all files
-				for (int i = 0; i < listFiles.length; i++) {
-
-					// get file path
-					String filePath = listFiles[i].getAbsolutePath();
-
-					// check for supported file extension
-					if (isSupportedFile(filePath, AppConstant.COMIC_EXTN)) {
-						// Add image path to array list
-						files.add(listFiles[i]);
-					}
+				// check for supported file extension
+				if (listFiles[i].canRead() &&
+						((isSupportedFile(filePath, AppConstant.COMIC_EXTN)) ||
+						listFiles[i].isDirectory())){
+					// Add image path to array list
+					files.add(listFiles[i]);
 				}
-			} else {
-				// image directory is empty
-				Toast.makeText(
-						_context,
-						AppConstant.PHOTO_ALBUM
-								+ " is empty. Please load some images in it !",
-						Toast.LENGTH_LONG).show();
 			}
-
-		} else {
-			AlertDialog.Builder alert = new AlertDialog.Builder(_context);
-			alert.setTitle("Error!");
-			alert.setMessage(AppConstant.PHOTO_ALBUM
-					+ " directory path is not valid! Please set the image directory name AppConstant.java class");
-			alert.setPositiveButton("OK", null);
-			alert.show();
 		}
+		
+		//Add "go back" on first position	
+		if (directory.getParent() != null){
+			files.add(0, new File(directory.getParent()));
+		} else {
+			files.add(0, directory);
+		}
+		
 
 		return files;
 	}
@@ -157,62 +161,7 @@ public class Utils {
 
 	}
 	
-	public File getFirstImageFile2(File file) {
-		File outputFile = null;
-		try {
-			File outputDir = _context.getCacheDir(); // temp dir
-			File thumbnailDir = new File (outputDir.getAbsolutePath() + File.separator + "thumbnail");
-			thumbnailDir.mkdir();
-			
-			outputFile = new File(thumbnailDir + File.separator + file.getName() + ".jpg");
-			if (!outputFile.exists()) {
-				
-				// Get the first image of the zip file
-				FileInputStream fin = new FileInputStream(file);
-				ZipInputStream zin = new ZipInputStream(fin);
-				ZipEntry ze = null;
-				String firstImage = "ZZ";
-				while ((ze = zin.getNextEntry()) != null) {
-					if (!ze.isDirectory()
-							&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
-						if (firstImage.compareTo(ze.getName()) > 0){
-							firstImage = ze.getName();
-						}
-					}
-				}
-				zin.close();
-				
-				
-				//Now, extract that image
-				if (!firstImage.equals("")){
-					fin = new FileInputStream(file);
-					zin = new ZipInputStream(fin);
-					ze = zin.getNextEntry();
-					while (!ze.getName().equals(firstImage)){
-						ze = zin.getNextEntry();
-					}
-					FileOutputStream fout = new FileOutputStream(outputFile);
 	
-					Bitmap imageBitmap = BitmapFactory.decodeStream(zin);
-	
-					imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 142,
-							200, false);
-	
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-					fout.write(baos.toByteArray());
-	
-					zin.closeEntry();
-					fout.close();
-					zin.close();
-				}
-			}
-		} catch (Exception e) {
-			Log.e("Decompress", "unzip", e);
-		}
-		return outputFile;
-
-	}
 
 	public ArrayList<String> getAllImagesFile(String fileName) {
 		ArrayList<String> fileNames = new ArrayList<String>();

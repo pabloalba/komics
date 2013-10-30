@@ -53,23 +53,18 @@ public class PageActivity extends Activity {
 
 		@Override
 		protected Object doInBackground(Object... params) {
-			Log.e("LoadComic", "1");
 			Intent i = getIntent();
 			String fileName = i.getStringExtra("file");
 			fileNames = utils.getAllImagesFile(fileName);
 			Collections.sort(fileNames);
-			
-			Log.e("LoadComic", "2 - "+fileNames.size());
 			return null;
 		}
 		
 		protected void 	onPreExecute(){
-			Log.e("LoadComic", "0");
 			progressDialog = ProgressDialog.show(PageActivity.this, "", "Loading comic", true);
 		}
 		
 		protected void onPostExecute(Object result){
-			Log.e("LoadComic", "3");
 			showPage(number);
 			progressDialog.dismiss();
 		}

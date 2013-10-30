@@ -1,9 +1,8 @@
 package net.kaleidos.comicsmagic.adapter;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.List;
 
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -20,7 +19,12 @@ import android.widget.TextView;
 
 public class ComicAdapter extends BaseAdapter {
 	private Context context;
-	private final ArrayList<File> files;
+	private ArrayList<File> files;
+	
+	public void setFiles(ArrayList<File> files) {
+		this.files = files;
+	}
+
 	private Utils utils;
  
 	public ComicAdapter(Context context, ArrayList<File> files, Utils utils) {
@@ -29,46 +33,55 @@ public class ComicAdapter extends BaseAdapter {
 		this.utils = utils;
 	}
  
-	public View getView(int position, View convertView, ViewGroup parent) {
- 
+	public View getView(int position, View convertView, ViewGroup parent) {		 
 		LayoutInflater inflater = (LayoutInflater) context
 			.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
  
 		View gridView;
  
 		if (convertView == null) {
-			File file = files.get(position);
- 
 			gridView = new View(context);
- 
 			// get layout from mobile.xml
 			gridView = inflater.inflate(R.layout.comic_file, null);
  
-			// set value into textview
-			TextView textView = (TextView) gridView
-					.findViewById(R.id.grid_item_label);
-			textView.setText(file.getName());
- 
-			// set image based on selected text
-			ImageView imageView = (ImageView) gridView
-					.findViewById(R.id.grid_item_image);
- 
-			imageView.setImageResource(R.drawable.comic);
 			
-			// get screen dimensions
-			File f = utils.getFirstImageFile(file);
-			if (f != null) {
-				Log.e("2 " + f.getAbsolutePath(), "unzip", null);				
-				Bitmap bmImg = BitmapFactory.decodeFile(f.getAbsolutePath());
-		        imageView.setImageBitmap(bmImg);
-			} else {
-				imageView.setImageResource(R.drawable.comic);
-			}
-			
-
 		} else {
 			gridView = (View) convertView;
 		}
+		// set value into textview
+		TextView textView = (TextView) gridView
+				.findViewById(R.id.grid_item_label);
+		// set image based on selected text
+		ImageView imageView = (ImageView) gridView
+				.findViewById(R.id.grid_item_image);
+
+		File file = files.get(position);
+		
+		if (position == 0){
+			//Add a "go up" special folder
+			textView.setText("..");
+			imageView.setImageResource(R.drawable.back);				
+			
+		} else {
+			
+			textView.setText(file.getName());
+			imageView.setImageResource(R.drawable.comic);
+			
+			if (file.isDirectory()){
+				imageView.setImageResource(R.drawable.folder);
+			} else {
+				File f = utils.getFirstImageFile(file);
+				if (f != null) {
+					Bitmap bmImg = BitmapFactory.decodeFile(f.getAbsolutePath());
+			        imageView.setImageBitmap(bmImg);
+				} else {
+					imageView.setImageResource(R.drawable.comic);
+				}
+			}
+		}
+		
+
+		
  
 		return gridView;
 	}
@@ -87,6 +100,11 @@ public class ComicAdapter extends BaseAdapter {
 	@Override
 	public long getItemId(int position) {
 		return 0;
+	}
+	
+	public void changeModelList(ArrayList<File> files) {
+	    this.files = files;
+	    notifyDataSetChanged();
 	}
  
 }

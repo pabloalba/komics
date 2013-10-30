@@ -9,6 +9,7 @@ import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -24,6 +25,9 @@ public class SelectComicActivity extends Activity {
 	Utils utils;
 	ArrayList<File> files = null;
 	ProgressDialog progressDialog;
+	SharedPreferences preferences;
+	SharedPreferences.Editor editPreferences;
+	File currentDirectory;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -35,7 +39,7 @@ public class SelectComicActivity extends Activity {
 		gridView.setOnItemClickListener(new OnItemClickListener() {
 			public void onItemClick(AdapterView<?> parent, View v,
 					int position, long id) {
-				openComic(position);
+				iconClick(position);
 
 			}
 		});
@@ -43,15 +47,38 @@ public class SelectComicActivity extends Activity {
 		
 		utils = new Utils(this);
 		
-		new LoadComics().execute();
+		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
+		editPreferences = preferences.edit();	
+		String currentPath = preferences.getString("currentPath", android.os.Environment.getExternalStorageDirectory().getAbsolutePath());
+		currentDirectory = new File(currentPath);
+		if (!currentDirectory.exists() || !currentDirectory.isDirectory()){
+			currentDirectory = android.os.Environment.getExternalStorageDirectory();
+		}
+		openDirectory(currentDirectory);
+		
+	}
+	
+	private void iconClick(int number){
+		File f = files.get(number);		
+		if (f.isDirectory()){
+			openDirectory(f);
+		} else {
+			openComic(f);
+		}
+		
 		
 	}
 
+	private void openDirectory(File file) {
+		currentDirectory = file;
+		editPreferences.putString("currentPath", file.getAbsolutePath());
+		new LoadComics().execute();
+	}
 
 
-	private void openComic(int number) {
+	private void openComic(File file) {
 		Intent i = new Intent(this, PageActivity.class);
-		i.putExtra("file", files.get(number).getAbsolutePath());
+		i.putExtra("file", file.getAbsolutePath());
 		this.startActivity(i);
 	}
 	
@@ -59,22 +86,28 @@ public class SelectComicActivity extends Activity {
 
 		@Override
 		protected Object doInBackground(Object... params) {
-			files = utils.getFiles();
+			
+			files = utils.getFiles(currentDirectory);
         	for (File f : files) {
-				utils.getFirstImageFile(f); //Preload
+        		if ((f != null) && (!f.isDirectory())){
+        			utils.getFirstImageFile(f); //Preload
+        		}
 			}
 			
 			return null;
 		}
 		
 		protected void 	onPreExecute(){
-			Log.e("LoadComic", "0");
 			progressDialog = ProgressDialog.show(SelectComicActivity.this, "", "Loading comics", true);
 		}
 		
 		protected void onPostExecute(Object result){
-			Log.e("LoadComic", "3");
-			gridView.setAdapter(new ComicAdapter(SelectComicActivity.this, files, utils));
+
+			if (gridView.getAdapter() instanceof ComicAdapter) {
+				((ComicAdapter) gridView.getAdapter()).changeModelList (files);
+			} else {
+				gridView.setAdapter(new ComicAdapter(SelectComicActivity.this, files, utils));
+			}
 			progressDialog.dismiss();
 		}
 		
