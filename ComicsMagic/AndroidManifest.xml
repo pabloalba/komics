@@ -24,7 +24,8 @@
         </activity>
         
         <activity
-            android:name="net.kaleidos.comicsmagic.PageActivity">
+            android:name="net.kaleidos.comicsmagic.PageActivity"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
         </activity>
     </application>
 
