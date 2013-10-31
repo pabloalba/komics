@@ -15,7 +15,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.Toast;
 
 public class PageActivity extends Activity {
 	ArrayList<String> fileNames;
@@ -31,6 +30,7 @@ public class PageActivity extends Activity {
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		touchImageView = new TouchImageView(this);
+		touchImageView.setMaxZoom(8f);
 		setContentView(touchImageView);
 		utils = new Utils(this);
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
@@ -64,8 +64,8 @@ public class PageActivity extends Activity {
 
 	private void showPage(int number) {
 		Bitmap bmImg = BitmapFactory.decodeFile(fileNames.get(number));
-		touchImageView.setImageBitmap(bmImg);
-		touchImageView.setMaxZoom(8f);
+		touchImageView.setImageBitmap(bmImg);		
+		touchImageView.fitToWidth();
 	}
 
 	private class LoadComic extends AsyncTask<Object, Object, Object> {

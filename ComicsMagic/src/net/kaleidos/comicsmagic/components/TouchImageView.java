@@ -1,4 +1,5 @@
 package net.kaleidos.comicsmagic.components;
+
 /**
  * Original code by Chintan Rathod
  * http://www.c-sharpcorner.com/UploadFile/88b6e5/multi-touch-panning-pinch-zoom-image-view-in-android-using/
@@ -52,7 +53,7 @@ public class TouchImageView extends ImageView {
 	ScaleGestureDetector mScaleDetector;
 
 	Context context;
-	
+
 	public PointF getLast() {
 		return last;
 	}
@@ -139,7 +140,6 @@ public class TouchImageView extends ImageView {
 						last.set(curr);
 						performClick();
 					}
-						
 
 					break;
 
@@ -312,56 +312,97 @@ public class TouchImageView extends ImageView {
 		if (saveScale == 1) {
 
 			// Fit to screen.
-
-			float scale;
-
-			Drawable drawable = getDrawable();
-
-			if (drawable == null || drawable.getIntrinsicWidth() == 0
-					|| drawable.getIntrinsicHeight() == 0)
-
-				return;
-
-			int bmWidth = drawable.getIntrinsicWidth();
-
-			int bmHeight = drawable.getIntrinsicHeight();
-
-			Log.d("bmSize", "bmWidth: " + bmWidth + " bmHeight : " + bmHeight);
-
-			float scaleX = (float) viewWidth / (float) bmWidth;
-
-			float scaleY = (float) viewHeight / (float) bmHeight;
-
-			scale = Math.min(scaleX, scaleY);
-
-			matrix.setScale(scale, scale);
-
-			// Center the image
-
-			float redundantYSpace = (float) viewHeight
-					- (scale * (float) bmHeight);
-
-			float redundantXSpace = (float) viewWidth
-					- (scale * (float) bmWidth);
-
-			redundantYSpace /= (float) 2;
-
-			redundantXSpace /= (float) 2;
-
-			matrix.postTranslate(redundantXSpace, redundantYSpace);
-
-			origWidth = viewWidth - 2 * redundantXSpace;
-
-			origHeight = viewHeight - 2 * redundantYSpace;
-
-			setImageMatrix(matrix);
+			//fitToScreen();
+			
+			fitToWidth();
 
 		}
 
 		fixTrans();
 
 	}
+
+	public void fitToScreen() {
+		float scale;
+
+		Drawable drawable = getDrawable();
+
+		if (drawable == null || drawable.getIntrinsicWidth() == 0
+				|| drawable.getIntrinsicHeight() == 0)
+
+			return;
+
+		int bmWidth = drawable.getIntrinsicWidth();
+
+		int bmHeight = drawable.getIntrinsicHeight();
+
+		Log.d("bmSize", "bmWidth: " + bmWidth + " bmHeight : " + bmHeight);
+
+		float scaleX = (float) viewWidth / (float) bmWidth;
+
+		float scaleY = (float) viewHeight / (float) bmHeight;
+
+		scale = Math.min(scaleX, scaleY);
+
+		matrix.setScale(scale, scale);
+
+		// Center the image
+
+		float redundantYSpace = (float) viewHeight - (scale * (float) bmHeight);
+
+		float redundantXSpace = (float) viewWidth - (scale * (float) bmWidth);
+
+		redundantYSpace /= (float) 2;
+
+		redundantXSpace /= (float) 2;
+
+		matrix.postTranslate(redundantXSpace, redundantYSpace);
+
+		origWidth = viewWidth - 2 * redundantXSpace;
+
+		origHeight = viewHeight - 2 * redundantYSpace;
+
+		setImageMatrix(matrix);
+
+	}
 	
-	 
+	
+	public void fitToWidth() {
+		Drawable drawable = getDrawable();
+
+		if (drawable == null || drawable.getIntrinsicWidth() == 0
+				|| drawable.getIntrinsicHeight() == 0)
+
+			return;
+
+		int bmWidth = drawable.getIntrinsicWidth();
+
+		int bmHeight = drawable.getIntrinsicHeight();
+
+		Log.d("bmSize", "bmWidth: " + bmWidth + " bmHeight : " + bmHeight);
+
+		float scale = (float) viewWidth / (float) bmWidth;
+		
+		matrix.setScale(scale, scale);
+
+		// Center the image
+
+		float redundantYSpace = (float) viewHeight - (scale * (float) bmHeight);
+
+		float redundantXSpace = (float) viewWidth - (scale * (float) bmWidth);
+
+		redundantYSpace /= (float) 2;
+
+		redundantXSpace /= (float) 2;
+
+		matrix.postTranslate(redundantXSpace, 0);
+
+		origWidth = viewWidth - 2 * redundantXSpace;
+
+		origHeight = viewHeight - 2 * redundantYSpace;
+
+		setImageMatrix(matrix);
+
+	}
 
 }
