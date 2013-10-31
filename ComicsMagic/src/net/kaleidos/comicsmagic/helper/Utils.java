@@ -56,7 +56,7 @@ public class Utils {
 		    		return 1;
 		    	} 
 		    	
-		        return f1.getName().compareTo(f2.getName());
+		        return f1.getName().compareToIgnoreCase(f2.getName());
 		    } });
 			
 
