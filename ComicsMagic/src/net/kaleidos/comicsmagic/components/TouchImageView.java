@@ -5,23 +5,14 @@ package net.kaleidos.comicsmagic.components;
  */
 
 import android.content.Context;
-
 import android.graphics.Matrix;
-
 import android.graphics.PointF;
-
 import android.graphics.drawable.Drawable;
-
 import android.util.AttributeSet;
-
 import android.util.Log;
-
 import android.view.MotionEvent;
-
 import android.view.ScaleGestureDetector;
-
 import android.view.View;
-
 import android.widget.ImageView;
 
 public class TouchImageView extends ImageView {
@@ -61,6 +52,10 @@ public class TouchImageView extends ImageView {
 	ScaleGestureDetector mScaleDetector;
 
 	Context context;
+	
+	public PointF getLast() {
+		return last;
+	}
 
 	public TouchImageView(Context context) {
 		super(context);
@@ -140,9 +135,11 @@ public class TouchImageView extends ImageView {
 
 					int yDiff = (int) Math.abs(curr.y - start.y);
 
-					if (xDiff < CLICK && yDiff < CLICK)
-
+					if (xDiff < CLICK && yDiff < CLICK) {
+						last.set(curr);
 						performClick();
+					}
+						
 
 					break;
 
@@ -364,5 +361,7 @@ public class TouchImageView extends ImageView {
 		fixTrans();
 
 	}
+	
+	 
 
 }

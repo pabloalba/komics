@@ -15,6 +15,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.widget.Toast;
 
 public class PageActivity extends Activity {
 	ArrayList<String> fileNames;
@@ -24,6 +25,7 @@ public class PageActivity extends Activity {
 	ProgressDialog progressDialog;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editPreferences;
+	float middleX;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -34,16 +36,27 @@ public class PageActivity extends Activity {
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
 		editPreferences = preferences.edit();	
 		number = preferences.getInt("pageNumber", 0);
+		middleX = utils.getScreenWidth() / 2;
 
 		new LoadComic().execute();
 
 		touchImageView.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View arg0) {
-				number++;
-				editPreferences.putInt("pageNumber", number);				
-				editPreferences.commit();
-				showPage(number);
+			public void onClick(View arg0) {				
+				int newNumber = number;
+				if ((touchImageView.getLast().x<middleX) && (number>0)) {
+					newNumber--;
+				} 
+				if ((touchImageView.getLast().x>middleX) && (number<fileNames.size())) {
+					newNumber++;
+				}
+					
+				if (newNumber != number) {
+					number = newNumber;
+					editPreferences.putInt("pageNumber", number);				
+					editPreferences.commit();
+					showPage(number);
+				}
 			}
 		});
 
@@ -52,7 +65,7 @@ public class PageActivity extends Activity {
 	private void showPage(int number) {
 		Bitmap bmImg = BitmapFactory.decodeFile(fileNames.get(number));
 		touchImageView.setImageBitmap(bmImg);
-		touchImageView.setMaxZoom(4f);
+		touchImageView.setMaxZoom(8f);
 	}
 
 	private class LoadComic extends AsyncTask<Object, Object, Object> {
