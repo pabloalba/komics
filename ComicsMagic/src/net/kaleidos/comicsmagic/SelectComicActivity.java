@@ -2,7 +2,6 @@ package net.kaleidos.comicsmagic;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
 
 import net.kaleidos.comicsmagic.adapter.ComicAdapter;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -12,12 +11,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.GridView;
-import android.widget.Toast;
 
 public class SelectComicActivity extends Activity {
 
@@ -50,6 +47,7 @@ public class SelectComicActivity extends Activity {
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
 		editPreferences = preferences.edit();	
 		String currentPath = preferences.getString("currentPath", android.os.Environment.getExternalStorageDirectory().getAbsolutePath());
+				
 		currentDirectory = new File(currentPath);
 		if (!currentDirectory.exists() || !currentDirectory.isDirectory()){
 			currentDirectory = android.os.Environment.getExternalStorageDirectory();
@@ -72,11 +70,14 @@ public class SelectComicActivity extends Activity {
 	private void openDirectory(File file) {
 		currentDirectory = file;
 		editPreferences.putString("currentPath", file.getAbsolutePath());
+		editPreferences.commit();
 		new LoadComics().execute();
 	}
 
 
 	private void openComic(File file) {
+		editPreferences.putInt("pageNumber", 0);				
+		editPreferences.commit();
 		Intent i = new Intent(this, PageActivity.class);
 		i.putExtra("file", file.getAbsolutePath());
 		this.startActivity(i);
