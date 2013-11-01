@@ -368,6 +368,9 @@ public class TouchImageView extends ImageView {
 		redundantYSpace /= (float) 2;
 		redundantXSpace /= (float) 2;
 		
+		/*Log.e("redundantYSpace", ""+redundantYSpace);
+		Log.e("redundantXSpace", ""+redundantXSpace);*/
+		
 
 		if (fitStyle == AppConstant.FIT_WIDTH && redundantYSpace<=0) {			
 			matrix.postTranslate(redundantXSpace, 0);
@@ -387,6 +390,7 @@ public class TouchImageView extends ImageView {
 	public void loadNewPage(Bitmap bmImg) {		
 		saveScale = 1f;
 		setImageBitmap(bmImg);
+		fit();
 	}
 
 }
