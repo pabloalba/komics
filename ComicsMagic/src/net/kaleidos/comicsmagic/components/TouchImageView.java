@@ -5,7 +5,9 @@ package net.kaleidos.comicsmagic.components;
  * http://www.c-sharpcorner.com/UploadFile/88b6e5/multi-touch-panning-pinch-zoom-image-view-in-android-using/
  */
 
+import net.kaleidos.comicsmagic.helper.AppConstant;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
@@ -42,7 +44,7 @@ public class TouchImageView extends ImageView {
 
 	int viewWidth, viewHeight;
 
-	static final int CLICK = 3;
+	static final int CLICK = 10;
 
 	float saveScale = 1f;
 
@@ -53,6 +55,16 @@ public class TouchImageView extends ImageView {
 	ScaleGestureDetector mScaleDetector;
 
 	Context context;
+
+	int fitStyle;
+
+	public int getFitStyle() {
+		return fitStyle;
+	}
+
+	public void setFitStyle(int fitStyle) {
+		this.fitStyle = fitStyle;
+	}
 
 	public PointF getLast() {
 		return last;
@@ -309,20 +321,13 @@ public class TouchImageView extends ImageView {
 
 		oldMeasuredWidth = viewWidth;
 
-		if (saveScale == 1) {
-
-			// Fit to screen.
-			//fitToScreen();
-			
-			fitToWidth();
-
-		}
+		fit();
 
 		fixTrans();
 
 	}
 
-	public void fitToScreen() {
+	public void fit() {
 		float scale;
 
 		Drawable drawable = getDrawable();
@@ -342,7 +347,15 @@ public class TouchImageView extends ImageView {
 
 		float scaleY = (float) viewHeight / (float) bmHeight;
 
-		scale = Math.min(scaleX, scaleY);
+		if (fitStyle == AppConstant.FIT_WIDTH) {
+			scale = scaleX;
+		} else if (fitStyle == AppConstant.FIT_HEIGHT) {
+			scale = scaleY;
+		} else if (fitStyle == AppConstant.FIT_IMAGE) {
+			scale = Math.min(scaleX, scaleY);
+		} else { // FitMagic
+			scale = Math.min(scaleX, scaleY);
+		}
 
 		matrix.setScale(scale, scale);
 
@@ -356,53 +369,26 @@ public class TouchImageView extends ImageView {
 
 		redundantXSpace /= (float) 2;
 
-		matrix.postTranslate(redundantXSpace, redundantYSpace);
+		if (fitStyle == AppConstant.FIT_WIDTH) {
+			matrix.postTranslate(redundantXSpace, 0);
+		} else if (fitStyle == AppConstant.FIT_HEIGHT) {
+			matrix.postTranslate(redundantXSpace, redundantYSpace);
+		} else if (fitStyle == AppConstant.FIT_IMAGE) {
+			matrix.postTranslate(redundantXSpace, redundantYSpace);
+		} else { // FitMagic
+			matrix.postTranslate(redundantXSpace, redundantYSpace);
+		}
 
 		origWidth = viewWidth - 2 * redundantXSpace;
 
 		origHeight = viewHeight - 2 * redundantYSpace;
-
 		setImageMatrix(matrix);
 
 	}
 	
-	
-	public void fitToWidth() {
-		Drawable drawable = getDrawable();
-
-		if (drawable == null || drawable.getIntrinsicWidth() == 0
-				|| drawable.getIntrinsicHeight() == 0)
-
-			return;
-
-		int bmWidth = drawable.getIntrinsicWidth();
-
-		int bmHeight = drawable.getIntrinsicHeight();
-
-		Log.d("bmSize", "bmWidth: " + bmWidth + " bmHeight : " + bmHeight);
-
-		float scale = (float) viewWidth / (float) bmWidth;
-		
-		matrix.setScale(scale, scale);
-
-		// Center the image
-
-		float redundantYSpace = (float) viewHeight - (scale * (float) bmHeight);
-
-		float redundantXSpace = (float) viewWidth - (scale * (float) bmWidth);
-
-		redundantYSpace /= (float) 2;
-
-		redundantXSpace /= (float) 2;
-
-		matrix.postTranslate(redundantXSpace, 0);
-
-		origWidth = viewWidth - 2 * redundantXSpace;
-
-		origHeight = viewHeight - 2 * redundantYSpace;
-
-		setImageMatrix(matrix);
-
+	public void loadNewPage(Bitmap bmImg) {		
+		saveScale = 1f;
+		setImageBitmap(bmImg);
 	}
 
 }

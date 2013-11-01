@@ -18,4 +18,10 @@ public class AppConstant {
  // supported file formats
     public static final List<String> IMAGE_EXTN = Arrays.asList("jpg", "jpeg",
             "png");
+    
+    public static final int FIT_WIDTH = 0;
+    public static final int FIT_HEIGHT = 1;
+    public static final int FIT_IMAGE = 2;
+    public static final int FIT_NONE = 3;
+    public static final int FIT_MAGIC = 4;
 }

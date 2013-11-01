@@ -4,5 +4,11 @@
     <string name="app_name">ComicsMagic</string>
     <string name="action_settings">Settings</string>
     <string name="hello_world">Hello world!</string>
-
+    <string name="fit_width">Fit width</string>
+    <string name="fit_height">Fit height</string>
+    <string name="fit_image">Fit image</string>
+    <string name="fit_none">Keep actual zoom</string>
+    <string name="fit_magic">Magic fit!</string>    
+    <string name="fit_style">Select fit style</string>    
+    
 </resources>
