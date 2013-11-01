@@ -8,8 +8,9 @@
     <ImageView
         android:id="@+id/grid_item_image"
         android:layout_width="match_parent"
-        android:layout_height="50px"
-        android:layout_marginRight="10px"
+        android:layout_height="71dp"
+        android:layout_marginRight="10dp"
+        android:layout_marginTop="10dp"
         android:src="@drawable/comic" >
     </ImageView>
  
@@ -17,11 +18,11 @@
         android:id="@+id/grid_item_label"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="5px"
+        android:layout_marginTop="5dp"
         android:gravity="center"
         android:text="@+id/label"
         android:textColor="#FFFFFFFF"
-        android:textSize="15px"
+        android:textSize="12sp"
         android:maxLines="3" >
 
     </TextView>

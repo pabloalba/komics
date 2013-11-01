@@ -143,8 +143,8 @@ public class Utils {
 					InputStream in = zipFile.getInputStream(firstImageEntry);					
 					FileOutputStream fout = new FileOutputStream(outputFile);
 					Bitmap imageBitmap = BitmapFactory.decodeStream(in);
-					imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 142,
-							200, false);
+					imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 71,
+							100, false);
 					ByteArrayOutputStream baos = new ByteArrayOutputStream();
 					imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
 					fout.write(baos.toByteArray());
