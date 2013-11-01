@@ -366,16 +366,14 @@ public class TouchImageView extends ImageView {
 		float redundantXSpace = (float) viewWidth - (scale * (float) bmWidth);
 
 		redundantYSpace /= (float) 2;
-
 		redundantXSpace /= (float) 2;
+		
 
-		if (fitStyle == AppConstant.FIT_WIDTH) {
+		if (fitStyle == AppConstant.FIT_WIDTH && redundantYSpace<=0) {			
 			matrix.postTranslate(redundantXSpace, 0);
-		} else if (fitStyle == AppConstant.FIT_HEIGHT) {
-			matrix.postTranslate(redundantXSpace, redundantYSpace);
-		} else if (fitStyle == AppConstant.FIT_IMAGE) {
-			matrix.postTranslate(redundantXSpace, redundantYSpace);
-		} else { // FitMagic
+		} else if (fitStyle == AppConstant.FIT_HEIGHT && redundantXSpace<=0) {
+			matrix.postTranslate(0, redundantYSpace);
+		} else {
 			matrix.postTranslate(redundantXSpace, redundantYSpace);
 		}
 
