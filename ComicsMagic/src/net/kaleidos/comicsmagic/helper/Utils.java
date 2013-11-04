@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -173,7 +175,8 @@ public class Utils {
 			deleteOldComics(comicsDir);
 			
 			File file = new File(fileName);
-			File outputDir = new File (comicsDir.getAbsolutePath() + File.separator + file.getName());
+			String md5Name = md5(file.getAbsolutePath());
+			File outputDir = new File (comicsDir.getAbsolutePath() + File.separator + md5Name);
 			if (!outputDir.exists()) {
 				outputDir.mkdir();
 				FileInputStream fin = new FileInputStream(file);
@@ -252,5 +255,29 @@ public class Utils {
 			}
 		}
 		return dir.delete();
+	}
+	
+	public static final String md5(final String s) {
+	    try {
+	        // Create MD5 Hash
+	        MessageDigest digest = java.security.MessageDigest
+	                .getInstance("MD5");
+	        digest.update(s.getBytes());
+	        byte messageDigest[] = digest.digest();
+
+	        // Create Hex String
+	        StringBuffer hexString = new StringBuffer();
+	        for (int i = 0; i < messageDigest.length; i++) {
+	            String h = Integer.toHexString(0xFF & messageDigest[i]);
+	            while (h.length() < 2)
+	                h = "0" + h;
+	            hexString.append(h);
+	        }
+	        return hexString.toString();
+
+	    } catch (NoSuchAlgorithmException e) {
+	        e.printStackTrace();
+	    }
+	    return "";
 	}
 }

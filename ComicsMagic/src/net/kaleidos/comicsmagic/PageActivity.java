@@ -32,6 +32,7 @@ public class PageActivity extends Activity {
 	SharedPreferences.Editor editPreferences;
 	float middleX;
 	int fitStyle = AppConstant.FIT_WIDTH;
+	String md5Name;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
@@ -63,13 +64,14 @@ public class PageActivity extends Activity {
 				if ((touchImageView.getLast().x<middleX) && (number>0)) {
 					newNumber--;
 				} 
-				if ((touchImageView.getLast().x>middleX) && (number<fileNames.size())) {
+				if ((touchImageView.getLast().x>middleX) && (number<fileNames.size()-1)) {
 					newNumber++;
 				}
 					
 				if (newNumber != number) {
 					number = newNumber;
 					editPreferences.putInt("pageNumber", number);				
+					editPreferences.putInt(md5Name, number);
 					editPreferences.commit();
 					showPage(number);
 				}
@@ -91,6 +93,7 @@ public class PageActivity extends Activity {
 			String fileName = i.getStringExtra("file");
 			fileNames = utils.getAllImagesFile(fileName);
 			Collections.sort(fileNames);
+			md5Name = i.getStringExtra("md5Name");
 			return null;
 		}
 

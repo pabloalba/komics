@@ -76,11 +76,16 @@ public class SelectComicActivity extends Activity {
 
 
 	private void openComic(File file) {
-		editPreferences.putInt("pageNumber", 0);				
+		String md5Name = Utils.md5(file.getAbsolutePath());
+		int lastPage = preferences.getInt(md5Name, 0);
+		
+		editPreferences.putInt("pageNumber", lastPage);				
 		editPreferences.commit();
 		Intent i = new Intent(this, PageActivity.class);
 		i.putExtra("file", file.getAbsolutePath());
+		i.putExtra("md5Name", md5Name);
 		this.startActivity(i);
+		
 	}
 	
 	private class LoadComics extends AsyncTask<Object, Object, Object> {
