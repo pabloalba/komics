@@ -1,31 +1,9 @@
 package net.kaleidos.comicsmagic;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-
-import net.kaleidos.comicsmagic.components.TouchImageView;
-import net.kaleidos.comicsmagic.helper.AppConstant;
-import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
-import android.app.ProgressDialog;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.Color;
-import android.os.AsyncTask;
-import android.os.Bundle;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-import android.view.View;
-import android.view.View.OnClickListener;
 
 public class PageActivity extends Activity {
-
+	/*
 	ArrayList<String> fileNames;
 	TouchImageView touchImageView;
 	int number = 0;
@@ -185,5 +163,5 @@ public class PageActivity extends Activity {
 		}
 		return false;
 	}
-
+	 */
 }
