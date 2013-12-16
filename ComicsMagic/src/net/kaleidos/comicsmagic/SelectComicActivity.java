@@ -92,8 +92,12 @@ public class SelectComicActivity extends Activity {
 
 		@Override
 		protected Object doInBackground(Object... params) {
-			
-			files = utils.getFiles(currentDirectory);
+			try {
+				files = utils.getFiles(currentDirectory);
+			} catch (Exception e) {
+				currentDirectory = new File("/");
+				files = utils.getFiles(currentDirectory);
+			}
         	for (File f : files) {
         		if ((f != null) && (!f.isDirectory())){
         			utils.getFirstImageFile(f); //Preload
