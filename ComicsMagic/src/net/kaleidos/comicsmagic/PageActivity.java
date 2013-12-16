@@ -53,10 +53,6 @@ public class PageActivity extends Activity {
 		setContentView(touchImageView);
 		utils = new Utils(this);
 
-
-		markMenuAsChecked(fitStyle);
-
-		//getItem(1).setChecked(true);
 		middleX = utils.getScreenWidth() / 2;
 
 		new LoadComic().execute();
@@ -157,35 +153,37 @@ public class PageActivity extends Activity {
 		touchImageView.fit();
 		showPage(number);
 		return true;
+
+
 	}
 
 
-	public void markMenuAsChecked(int fitStyle) {
-		return;
-		/*
-		int id = -1;
-		switch (fitStyle) {
-	        case AppConstant.FIT_WIDTH:
-	            id = R.id.fit_width;
-	            break;
-	        case AppConstant.FIT_HEIGHT:
-	            id = R.id.fit_height;
-	            break;
-	        case AppConstant.FIT_IMAGE:
-	            id = R.id.fit_image;
-	            break;
-	        case AppConstant.FIT_NONE:
-	            id = R.id.fit_none;
-	            break;
-	        case AppConstant.FIT_MAGIC:
-	            id = R.id.fit_magic;
-	            break;
-	    }
-		if (id != -1) {
-			((MenuItem)findViewById(id)).setChecked(true);
-		}
-		 */
+	@Override
+	public boolean onMenuOpened(int featureId, Menu menu) {
+		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
+		if (super.onMenuOpened(featureId, menu)){
+			int id = -1;
+			switch (fitStyle) {
+			case AppConstant.FIT_WIDTH:
+				id = R.id.fit_width;
+				break;
+			case AppConstant.FIT_HEIGHT:
+				id = R.id.fit_height;
+				break;
+			case AppConstant.FIT_IMAGE:
+				id = R.id.fit_image;
+				break;
+			case AppConstant.FIT_MAGIC:
+				id = R.id.fit_magic;
+				break;
+			}
 
+			if (id != -1) {
+				menu.findItem(id).setChecked(true);
+			}
+			return true;
+		}
+		return false;
 	}
 
 }
