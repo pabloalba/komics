@@ -1,33 +1,28 @@
 package net.kaleidos.comicsmagic.helper;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.Enumeration;
 import java.util.List;
 import java.util.Locale;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
+import net.kaleidos.comicsmagic.helper.extractor.RarExtractor;
+import net.kaleidos.comicsmagic.helper.extractor.ZipExtractor;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
-import android.util.Log;
 import android.view.Display;
 import android.view.WindowManager;
 
 public class Utils {
-	private Context _context;
+	private final Context _context;
 
 	// constructor
 	public Utils(Context context) {
@@ -36,29 +31,30 @@ public class Utils {
 
 	// Reading file paths from SDCard
 	public ArrayList<File> getFiles(File directory) {
-		ArrayList<File> files = new ArrayList<File>();	
-		
+		ArrayList<File> files = new ArrayList<File>();
+
 		// getting list of file paths
 		File[] listFiles = directory.listFiles();
 
 		// Check for count
 		if (listFiles.length > 0) {
-			
-			
+
+
 			Arrays.sort(listFiles, new Comparator<File>(){
-		    public int compare(File f1, File f2)
-		    {
-		    	//First folders
-		    	if (f1.isDirectory() && !f2.isDirectory()){
-		    		return -1;
-		    	}
-		    	if (!f1.isDirectory() && f2.isDirectory()){
-		    		return 1;
-		    	} 
-		    	
-		        return f1.getName().compareToIgnoreCase(f2.getName());
-		    } });
-			
+				@Override
+				public int compare(File f1, File f2)
+				{
+					//First folders
+					if (f1.isDirectory() && !f2.isDirectory()){
+						return -1;
+					}
+					if (!f1.isDirectory() && f2.isDirectory()){
+						return 1;
+					}
+
+					return f1.getName().compareToIgnoreCase(f2.getName());
+				} });
+
 
 			// loop through all files
 			for (int i = 0; i < listFiles.length; i++) {
@@ -69,26 +65,26 @@ public class Utils {
 				// check for supported file extension
 				if (listFiles[i].canRead() &&
 						((isSupportedFile(filePath, AppConstant.COMIC_EXTN)) ||
-						listFiles[i].isDirectory())){
+								listFiles[i].isDirectory())){
 					// Add image path to array list
 					files.add(listFiles[i]);
 				}
 			}
 		}
-		
-		//Add "go back" on first position	
+
+		//Add "go back" on first position
 		if (directory.getParent() != null){
 			files.add(0, new File(directory.getParent()));
 		} else {
 			files.add(0, directory);
 		}
-		
+
 
 		return files;
 	}
 
 	// Check supported file extensions
-	private boolean isSupportedFile(String filePath,
+	public static boolean isSupportedFile(String filePath,
 			List<String> validExtensions) {
 		String ext = filePath.substring((filePath.lastIndexOf(".") + 1),
 				filePath.length());
@@ -118,120 +114,66 @@ public class Utils {
 	}
 
 	public File getFirstImageFile(File file) {
-		File outputFile = null;
-		try {
-			File outputDir = _context.getCacheDir(); // temp dir
-			File thumbnailDir = new File (outputDir.getAbsolutePath() + File.separator + "thumbnail");
-			thumbnailDir.mkdir();
-			
-			outputFile = new File(thumbnailDir + File.separator + file.getName() + ".jpg");
-			if (!outputFile.exists()) {
-				ZipFile zipFile = new ZipFile(file);
-				Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
-				String firstImage = "ZZ";
-				ZipEntry firstImageEntry = null;
-				while (zipEntries.hasMoreElements()) {
-					ZipEntry ze = ((ZipEntry)zipEntries.nextElement());
-					if (!ze.isDirectory()
-							&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
-						if (firstImage.compareTo(ze.getName()) > 0){
-							firstImage = ze.getName();
-							firstImageEntry = ze;
-						}
-					}
-				}
-				
-				if (firstImageEntry != null) {
-					InputStream in = zipFile.getInputStream(firstImageEntry);					
-					FileOutputStream fout = new FileOutputStream(outputFile);
-					Bitmap imageBitmap = BitmapFactory.decodeStream(in);
-					imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 71,
-							100, false);
-					ByteArrayOutputStream baos = new ByteArrayOutputStream();
-					imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-					fout.write(baos.toByteArray());
-					fout.close();
-					in.close();
-				}
-			}
-		} catch (Exception e) {
-			Log.e("Decompress", "unzip", e);
+		if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)){
+			return ZipExtractor.getFirstImageFile(file, _context);
+		} else if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_RAR)){
+			return RarExtractor.getFirstImageFile(file, _context);
 		}
-		return outputFile;
+		return null;
 
 	}
-	
-	
+
+
 
 	public ArrayList<String> getAllImagesFile(String fileName) {
 		ArrayList<String> fileNames = new ArrayList<String>();
-		try {
-			File cacheDir = _context.getCacheDir(); // temp dir
-			
-			File comicsDir = new File (cacheDir.getAbsolutePath() + File.separator + "comics");
-			comicsDir.mkdir();
-			
-			//Delete old comics
-			deleteOldComics(comicsDir);
-			
-			File file = new File(fileName);
-			String md5Name = md5(file.getAbsolutePath());
-			File outputDir = new File (comicsDir.getAbsolutePath() + File.separator + md5Name);
-			if (!outputDir.exists()) {
-				outputDir.mkdir();
-				FileInputStream fin = new FileInputStream(file);
-				ZipInputStream zin = new ZipInputStream(fin);
-				ZipEntry ze = null;
-				while ((ze = zin.getNextEntry()) != null) {
-					if (!ze.isDirectory()
-							&& isSupportedFile(ze.getName(), AppConstant.IMAGE_EXTN)) {
-						File outputFile = new File (outputDir.getAbsolutePath() + File.separator + ze.getName());
-						FileOutputStream fout = new FileOutputStream(outputFile);
-	
-						byte[] buffer = new byte[4096];
-						for (int c = zin.read(buffer); c != -1; c = zin
-								.read(buffer)) {
-							fout.write(buffer, 0, c);
-						}
-	
-						zin.closeEntry();
-						fout.close();
-					
-						fileNames.add(outputFile.getAbsolutePath());
-					}
-				}
-				zin.close();
-			} else {
-				File[] files = outputDir.listFiles();
-				for (int i=0; i<files.length;i++){
-					fileNames.add(files[i].getAbsolutePath());
-				}
+
+		File file = new File(fileName);
+		File cacheDir = _context.getCacheDir(); // temp dir
+
+		File comicsDir = new File (cacheDir.getAbsolutePath() + File.separator + "comics");
+		comicsDir.mkdir();
+
+		//Delete old comics
+		Utils.deleteOldComics(comicsDir);
+
+		String md5Name = Utils.md5(file.getAbsolutePath());
+		File outputDir = new File (comicsDir.getAbsolutePath() + File.separator + md5Name);
+		if (!outputDir.exists()) {
+			outputDir.mkdir();
+			if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)){
+				fileNames = ZipExtractor.getAllImagesFile(file, outputDir);
+			} else if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_RAR)){
+				fileNames = RarExtractor.getAllImagesFile(file, outputDir);
 			}
-		} catch (Exception e) {
-			Log.e("Decompress", "unzip", e);
+		} else {
+			File[] files = outputDir.listFiles();
+			for (int i=0; i<files.length;i++){
+				fileNames.add(files[i].getAbsolutePath());
+			}
 		}
 		return fileNames;
-
 	}
-	
+
 	/**
 	 * Delete comics cache. If there are more than 3 comics stored, delete
 	 * the oldests
 	 * @param comicsDir
 	 */
-	public void deleteOldComics(File comicsDir){
+	public static void deleteOldComics(File comicsDir){
 		File[] files = comicsDir.listFiles();
 		if (files.length > 3) {
 			Arrays.sort(files, new Comparator<File>(){
-			    public int compare(File f1, File f2)
-			    {
-			        return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-			    } });
+				@Override
+				public int compare(File f1, File f2)
+				{
+					return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
+				} });
 			for (int i =0; i<files.length-3;i++){
-				deleteDir(files[i]);
+				Utils.deleteDir(files[i]);
 			}
 		}
-		
+
 	}
 
 	public void deleteCache() {
@@ -244,7 +186,7 @@ public class Utils {
 		}
 	}
 
-	public boolean deleteDir(File dir) {
+	public static boolean deleteDir(File dir) {
 		if (dir != null && dir.isDirectory()) {
 			String[] children = dir.list();
 			for (int i = 0; i < children.length; i++) {
@@ -256,28 +198,57 @@ public class Utils {
 		}
 		return dir.delete();
 	}
-	
+
 	public static final String md5(final String s) {
-	    try {
-	        // Create MD5 Hash
-	        MessageDigest digest = java.security.MessageDigest
-	                .getInstance("MD5");
-	        digest.update(s.getBytes());
-	        byte messageDigest[] = digest.digest();
+		try {
+			// Create MD5 Hash
+			MessageDigest digest = java.security.MessageDigest
+					.getInstance("MD5");
+			digest.update(s.getBytes());
+			byte messageDigest[] = digest.digest();
 
-	        // Create Hex String
-	        StringBuffer hexString = new StringBuffer();
-	        for (int i = 0; i < messageDigest.length; i++) {
-	            String h = Integer.toHexString(0xFF & messageDigest[i]);
-	            while (h.length() < 2)
-	                h = "0" + h;
-	            hexString.append(h);
-	        }
-	        return hexString.toString();
+			// Create Hex String
+			StringBuffer hexString = new StringBuffer();
+			for (int i = 0; i < messageDigest.length; i++) {
+				String h = Integer.toHexString(0xFF & messageDigest[i]);
+				while (h.length() < 2)
+					h = "0" + h;
+				hexString.append(h);
+			}
+			return hexString.toString();
 
-	    } catch (NoSuchAlgorithmException e) {
-	        e.printStackTrace();
-	    }
-	    return "";
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+		}
+		return "";
 	}
+
+	public static Bitmap readBitmapFromStream(InputStream in) throws IOException{
+		//Read the file to memory
+		byte[] byteArr = new byte[0];
+		byte[] buffer = new byte[1024];
+		int len;
+		int count = 0;
+
+
+		while ((len = in.read(buffer)) > -1) {
+			if (len != 0) {
+				if (count + len > byteArr.length) {
+					byte[] newbuf = new byte[(count + len) * 2];
+					System.arraycopy(byteArr, 0, newbuf, 0, count);
+					byteArr = newbuf;
+				}
+
+				System.arraycopy(buffer, 0, byteArr, count, len);
+				count += len;
+			}
+		}
+
+		final BitmapFactory.Options options = new BitmapFactory.Options();
+		options.inPurgeable = true;
+		options.inInputShareable =true;
+
+		return BitmapFactory.decodeByteArray(byteArr, 0, count, options);
+	}
+
 }

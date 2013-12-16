@@ -14,7 +14,9 @@ public class AppConstant {
     public static final String PHOTO_ALBUM = "komics";
  
     // supported file formats
-    public static final List<String> COMIC_EXTN = Arrays.asList("cbz", "zip");
+    public static final List<String> COMIC_EXTN = Arrays.asList("cbz", "zip", "cbr", "rar");
+    public static final List<String> COMIC_EXTN_ZIP = Arrays.asList("cbz", "zip");
+    public static final List<String> COMIC_EXTN_RAR = Arrays.asList("cbr", "rar");
  // supported file formats
     public static final List<String> IMAGE_EXTN = Arrays.asList("jpg", "jpeg",
             "png");

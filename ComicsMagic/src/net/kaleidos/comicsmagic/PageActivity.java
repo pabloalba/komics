@@ -1,5 +1,8 @@
 package net.kaleidos.comicsmagic;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -11,18 +14,18 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.View.OnClickListener;
 
-public class PageActivity extends Activity {	
-	
+public class PageActivity extends Activity {
+
 	ArrayList<String> fileNames;
 	TouchImageView touchImageView;
 	int number = 0;
@@ -33,25 +36,26 @@ public class PageActivity extends Activity {
 	float middleX;
 	int fitStyle = AppConstant.FIT_WIDTH;
 	String md5Name;
+	Bitmap bmImg;
 
 	@Override
 	public void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
-		editPreferences = preferences.edit();	
+		editPreferences = preferences.edit();
 		number = preferences.getInt("pageNumber", 0);
 		fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
-		
+
 		touchImageView = new TouchImageView(this);
 		touchImageView.setBackgroundColor(Color.BLACK);
 		touchImageView.setFitStyle(fitStyle);
 		touchImageView.setMaxZoom(8f);
 		setContentView(touchImageView);
 		utils = new Utils(this);
-		
-		
+
+
 		markMenuAsChecked(fitStyle);
-		
+
 		//getItem(1).setChecked(true);
 		middleX = utils.getScreenWidth() / 2;
 
@@ -59,18 +63,18 @@ public class PageActivity extends Activity {
 
 		touchImageView.setOnClickListener(new OnClickListener() {
 			@Override
-			public void onClick(View arg0) {				
+			public void onClick(View arg0) {
 				int newNumber = number;
 				if ((touchImageView.getLast().x<middleX) && (number>0)) {
 					newNumber--;
-				} 
+				}
 				if ((touchImageView.getLast().x>middleX) && (number<fileNames.size()-1)) {
 					newNumber++;
 				}
-					
+
 				if (newNumber != number) {
 					number = newNumber;
-					editPreferences.putInt("pageNumber", number);				
+					editPreferences.putInt("pageNumber", number);
 					editPreferences.putInt(md5Name, number);
 					editPreferences.commit();
 					showPage(number);
@@ -81,8 +85,19 @@ public class PageActivity extends Activity {
 	}
 
 	private void showPage(int number) {
-		Bitmap bmImg = BitmapFactory.decodeFile(fileNames.get(number));		
-		touchImageView.loadNewPage(bmImg);
+		if (bmImg != null) {
+			bmImg.recycle();
+		}
+
+		try {
+			File file = new File(fileNames.get(number));
+			InputStream in = new FileInputStream(file);
+			bmImg = Utils.readBitmapFromStream(in);
+			in.close();
+			touchImageView.loadNewPage(bmImg);
+		} catch (Exception e){
+			Log.e("PageActivity", "Error on showPage", e);
+		}
 	}
 
 	private class LoadComic extends AsyncTask<Object, Object, Object> {
@@ -97,53 +112,55 @@ public class PageActivity extends Activity {
 			return null;
 		}
 
+		@Override
 		protected void onPreExecute() {
 			progressDialog = ProgressDialog.show(PageActivity.this, "",
 					"Loading comic", true);
 		}
 
+		@Override
 		protected void onPostExecute(Object result) {
 			showPage(number);
 			progressDialog.dismiss();
 		}
 
 	}
-	
-	
+
+
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
-	    MenuInflater inflater = getMenuInflater();
-	    inflater.inflate(R.menu.page, menu);
-	    return true;
+		MenuInflater inflater = getMenuInflater();
+		inflater.inflate(R.menu.page, menu);
+		return true;
 	}
-	
+
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
 		item.setChecked(true);
-	    // Handle item selection	    
+		// Handle item selection
 		switch (item.getItemId()) {
-	        case R.id.fit_width:
-	            fitStyle = AppConstant.FIT_WIDTH;
-	            break;
-	        case R.id.fit_height:
-	            fitStyle = AppConstant.FIT_HEIGHT;
-				break;
-	        case R.id.fit_image:
-	            fitStyle = AppConstant.FIT_IMAGE;
-				break;
-	        case R.id.fit_magic:
-	            fitStyle = AppConstant.FIT_MAGIC;
-	    }
-		editPreferences.putInt("fitStyle", fitStyle);				
+		case R.id.fit_width:
+			fitStyle = AppConstant.FIT_WIDTH;
+			break;
+		case R.id.fit_height:
+			fitStyle = AppConstant.FIT_HEIGHT;
+			break;
+		case R.id.fit_image:
+			fitStyle = AppConstant.FIT_IMAGE;
+			break;
+		case R.id.fit_magic:
+			fitStyle = AppConstant.FIT_MAGIC;
+		}
+		editPreferences.putInt("fitStyle", fitStyle);
 		editPreferences.commit();
 		touchImageView.setFitStyle(fitStyle);
 		touchImageView.fit();
 		showPage(number);
 		return true;
 	}
-	
-	
-	public void markMenuAsChecked(int fitStyle) {		
+
+
+	public void markMenuAsChecked(int fitStyle) {
 		return;
 		/*
 		int id = -1;
@@ -162,13 +179,13 @@ public class PageActivity extends Activity {
 	            break;
 	        case AppConstant.FIT_MAGIC:
 	            id = R.id.fit_magic;
-	            break;	        
+	            break;
 	    }
 		if (id != -1) {
-			((MenuItem)findViewById(id)).setChecked(true);			
+			((MenuItem)findViewById(id)).setChecked(true);
 		}
-		*/
-		
+		 */
+
 	}
 
 }
