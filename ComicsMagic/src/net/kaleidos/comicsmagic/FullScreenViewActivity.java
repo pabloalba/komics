@@ -125,31 +125,10 @@ public class FullScreenViewActivity extends Activity {
 	}
 
 	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
-		if (super.onMenuOpened(featureId, menu)) {
-			int id = -1;
-			switch (fitStyle) {
-			case AppConstant.FIT_WIDTH:
-				id = R.id.fit_width;
-				break;
-			case AppConstant.FIT_HEIGHT:
-				id = R.id.fit_height;
-				break;
-			case AppConstant.FIT_IMAGE:
-				id = R.id.fit_image;
-				break;
-			case AppConstant.FIT_MAGIC:
-				id = R.id.fit_magic;
-				break;
-			}
-
-			if (id != -1) {
-				menu.findItem(id).setChecked(true);
-			}
-			return true;
-		}
-		return false;
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		Utils.markSelectedItemAsChecked(menu, preferences);
+		return true;
 	}
 
 	public boolean isFullScreen() {
