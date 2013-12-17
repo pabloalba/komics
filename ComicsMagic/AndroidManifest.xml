@@ -22,21 +22,12 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        
-        <activity
-            android:name="net.kaleidos.comicsmagic.PageActivity"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
-        </activity>
-        
+
         <activity
             android:name="net.kaleidos.comicsmagic.FullScreenViewActivity"
             android:theme="@android:style/Theme.Holo.NoActionBar">
         </activity>
-        
-        <activity
-            android:name="net.kaleidos.comicsmagic.GalleryFileActivity"
-            android:theme="@style/AppTheme">
-        </activity>
+
     </application>
 
 </manifest>
