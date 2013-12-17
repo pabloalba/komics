@@ -17,7 +17,6 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.ViewConfiguration;
 import android.view.Window;
 
 public class FullScreenViewActivity extends Activity {
@@ -71,22 +70,23 @@ public class FullScreenViewActivity extends Activity {
 						return true;
 					}
 
-					// If the isn't a physical menu button, show the action bar
-					// when taping the top of the image
-					if (!ViewConfiguration.get(getApplicationContext())
-							.hasPermanentMenuKey()) {
-						if (e.getY() < topQuarter) {
-							setFullScreen(false);
-							return true;
+					// Show the action bar when taping the top of the image
+					if (e.getY() < topQuarter) {
+						getActionBar().setTitle(
+								getResources().getString(R.string.app_name)
+										+ " (" + viewPager.getCurrentItem()
+										+ " / " + fileNames.size() + ")");
+						setFullScreen(false);
+						return true;
+					} else {
+						int number = viewPager.getCurrentItem();
+						if ((e.getX() < middleX) && (number > 0)) {
+							viewPager.setCurrentItem(number - 1, true);
 						}
-					}
-
-					int number = viewPager.getCurrentItem();
-					if ((e.getX() < middleX) && (number > 0)) {
-						viewPager.setCurrentItem(number - 1, true);
-					}
-					if ((e.getX() > middleX) && (number < fileNames.size() - 1)) {
-						viewPager.setCurrentItem(number + 1, true);
+						if ((e.getX() > middleX)
+								&& (number < fileNames.size() - 1)) {
+							viewPager.setCurrentItem(number + 1, true);
+						}
 					}
 					return true;
 				}
