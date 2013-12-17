@@ -166,7 +166,7 @@ public class SelectComicActivity extends Activity {
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
-		inflater.inflate(R.menu.page, menu);
+		inflater.inflate(R.menu.menu_select_comic, menu);
 		return true;
 	}
 

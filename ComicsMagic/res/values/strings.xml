@@ -9,5 +9,6 @@
     <string name="fit_none">Keep actual zoom</string>
     <string name="fit_magic">Magic fit!</string>    
     <string name="fit_style">Select fit style</string>    
+    <string name="select_page">Go to page...</string>    
     
 </resources>
