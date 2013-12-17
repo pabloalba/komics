@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 
-import net.kaleidos.comicsmagic.FullScreenViewActivity;
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.helper.AppConstant;
@@ -35,7 +34,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
 	public void setFitStyle(int fitStyle) {
 		this.fitStyle = fitStyle;
-		//imgDisplay.setFitStyle(fitStyle);
+		// imgDisplay.setFitStyle(fitStyle);
 	}
 
 	// constructor
@@ -60,13 +59,12 @@ public class FullScreenImageAdapter extends PagerAdapter {
 	public Object instantiateItem(ViewGroup container, int position) {
 		inflater = (LayoutInflater) _activity
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-		View viewLayout = inflater.inflate(R.layout.layout_fullscreen_image, container,
-				false);
+		View viewLayout = inflater.inflate(R.layout.layout_fullscreen_image,
+				container, false);
 		imgDisplay = (TouchImageView) viewLayout.findViewById(R.id.imgDisplay);
 		imgDisplay.setBackgroundColor(Color.BLACK);
-		//imgDisplay.setFitStyle(fitStyle);
+		// imgDisplay.setFitStyle(fitStyle);
 		imgDisplay.setMaxZoom(8f);
-		imgDisplay.setFullScreenViewActivity ((FullScreenViewActivity) _activity);
 
 		try {
 			File f = new File(_imagePaths.get(position));
@@ -74,17 +72,16 @@ public class FullScreenImageAdapter extends PagerAdapter {
 			Bitmap bitmap = Utils.readBitmapFromStream(in);
 			in.close();
 			imgDisplay.setImageBitmap(bitmap);
-		} catch(Exception e){
-			//Do not show image
+		} catch (Exception e) {
+			// Do not show image
 		}
-
 
 		((ViewPager) container).addView(viewLayout);
 
 		return viewLayout;
 	}
 
-	public TouchImageView getTouchImageView(){
+	public TouchImageView getTouchImageView() {
 		return imgDisplay;
 	}
 

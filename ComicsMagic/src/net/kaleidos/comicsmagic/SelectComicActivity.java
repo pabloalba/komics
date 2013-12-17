@@ -49,30 +49,31 @@ public class SelectComicActivity extends Activity {
 			}
 		});
 
-
 		utils = new Utils(this);
 
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
 		editPreferences = preferences.edit();
-		String currentPath = preferences.getString("currentPath", android.os.Environment.getExternalStorageDirectory().getAbsolutePath());
+		String currentPath = preferences.getString("currentPath",
+				android.os.Environment.getExternalStorageDirectory()
+						.getAbsolutePath());
 
 		currentDirectory = new File(currentPath);
-		if (!currentDirectory.exists() || !currentDirectory.isDirectory()){
-			currentDirectory = android.os.Environment.getExternalStorageDirectory();
+		if (!currentDirectory.exists() || !currentDirectory.isDirectory()) {
+			currentDirectory = android.os.Environment
+					.getExternalStorageDirectory();
 		}
 		openDirectory(currentDirectory);
 
 	}
 
-	private void iconClick(int number){
+	private void iconClick(int number) {
 		File f = files.get(number);
-		if (f.isDirectory()){
+		if (f.isDirectory()) {
 			openDirectory(f);
 		} else {
 			currentComic = f;
 			openComic();
 		}
-
 
 	}
 
@@ -83,26 +84,24 @@ public class SelectComicActivity extends Activity {
 		new LoadComics().execute();
 	}
 
-
 	private void openComic() {
 		new LoadComic().execute();
 	}
 
-	private void comicFilesLoaded(){
+	private void comicFilesLoaded() {
 		String md5Name = Utils.md5(currentComic.getAbsolutePath());
 		int lastPage = preferences.getInt(md5Name, 0);
 
 		editPreferences.putInt("pageNumber", lastPage);
 		editPreferences.commit();
 
-		//Intent i = new Intent(this, PageActivity.class);
+		// Intent i = new Intent(this, PageActivity.class);
 		Intent i = new Intent(this, FullScreenViewActivity.class);
+		// Intent i = new Intent(this, GalleryFileActivity.class);
 		i.putExtra("fileName", currentComic.getAbsolutePath());
 		i.putExtra("md5Name", md5Name);
 		this.startActivity(i);
 	}
-
-
 
 	private class LoadComic extends AsyncTask<Object, Object, Object> {
 		@Override
@@ -137,8 +136,8 @@ public class SelectComicActivity extends Activity {
 				files = utils.getFiles(currentDirectory);
 			}
 			for (File f : files) {
-				if ((f != null) && (!f.isDirectory())){
-					utils.getFirstImageFile(f); //Preload
+				if ((f != null) && (!f.isDirectory())) {
+					utils.getFirstImageFile(f); // Preload
 				}
 			}
 
@@ -146,22 +145,22 @@ public class SelectComicActivity extends Activity {
 		}
 
 		@Override
-		protected void 	onPreExecute(){
-			progressDialog = ProgressDialog.show(SelectComicActivity.this, "", "Loading comics", true);
+		protected void onPreExecute() {
+			progressDialog = ProgressDialog.show(SelectComicActivity.this, "",
+					"Loading comics", true);
 		}
 
 		@Override
-		protected void onPostExecute(Object result){
+		protected void onPostExecute(Object result) {
 
 			if (gridView.getAdapter() instanceof ComicAdapter) {
-				((ComicAdapter) gridView.getAdapter()).changeModelList (files);
+				((ComicAdapter) gridView.getAdapter()).changeModelList(files);
 			} else {
-				gridView.setAdapter(new ComicAdapter(SelectComicActivity.this, files, utils));
+				gridView.setAdapter(new ComicAdapter(SelectComicActivity.this,
+						files, utils));
 			}
 			progressDialog.dismiss();
 		}
-
-
 
 	}
 
@@ -198,7 +197,7 @@ public class SelectComicActivity extends Activity {
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
-		if (super.onMenuOpened(featureId, menu)){
+		if (super.onMenuOpened(featureId, menu)) {
 			int id = -1;
 			switch (fitStyle) {
 			case AppConstant.FIT_WIDTH:

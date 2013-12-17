@@ -10,7 +10,11 @@
 
 package net.kaleidos.comicsmagic.components;
 
-import net.kaleidos.comicsmagic.FullScreenViewActivity;
+import static net.kaleidos.comicsmagic.components.TouchImageView.State.ANIMATE_ZOOM;
+import static net.kaleidos.comicsmagic.components.TouchImageView.State.DRAG;
+import static net.kaleidos.comicsmagic.components.TouchImageView.State.FLING;
+import static net.kaleidos.comicsmagic.components.TouchImageView.State.NONE;
+import static net.kaleidos.comicsmagic.components.TouchImageView.State.ZOOM;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
@@ -32,8 +36,6 @@ import android.widget.ImageView;
 import android.widget.Scroller;
 
 public class TouchImageView extends ImageView {
-
-	private FullScreenViewActivity fullScreenViewActivity;
 
 	private static final String DEBUG = "DEBUG";
 
@@ -58,7 +60,10 @@ public class TouchImageView extends ImageView {
 	//
 	private Matrix matrix, prevMatrix;
 
-	public static enum State { NONE, DRAG, ZOOM, FLING, ANIMATE_ZOOM };
+	public static enum State {
+		NONE, DRAG, ZOOM, FLING, ANIMATE_ZOOM
+	};
+
 	private State state;
 
 	private float minScale;
@@ -76,21 +81,14 @@ public class TouchImageView extends ImageView {
 	private int viewWidth, viewHeight, prevViewWidth, prevViewHeight;
 
 	//
-	// Size of image when it is stretched to fit view. Before and After rotation.
+	// Size of image when it is stretched to fit view. Before and After
+	// rotation.
 	//
-	private float matchViewWidth, matchViewHeight, prevMatchViewWidth, prevMatchViewHeight;
+	private float matchViewWidth, matchViewHeight, prevMatchViewWidth,
+			prevMatchViewHeight;
 
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mGestureDetector;
-
-	public FullScreenViewActivity getFullScreenViewActivity() {
-		return fullScreenViewActivity;
-	}
-
-	public void setFullScreenViewActivity(
-			FullScreenViewActivity fullScreenViewActivity) {
-		this.fullScreenViewActivity = fullScreenViewActivity;
-	}
 
 	public TouchImageView(Context context) {
 		super(context);
@@ -122,7 +120,7 @@ public class TouchImageView extends ImageView {
 		superMaxScale = SUPER_MAX_MULTIPLIER * maxScale;
 		setImageMatrix(matrix);
 		setScaleType(ScaleType.MATRIX);
-		setState(State.NONE);
+		setState(NONE);
 		setOnTouchListener(new TouchImageViewListener());
 	}
 
@@ -160,7 +158,9 @@ public class TouchImageView extends ImageView {
 
 	/**
 	 * Set the max zoom multiplier. Default value: 3.
-	 * @param max max zoom multiplier.
+	 * 
+	 * @param max
+	 *            max zoom multiplier.
 	 */
 	public void setMaxZoom(float max) {
 		maxScale = max;
@@ -169,7 +169,9 @@ public class TouchImageView extends ImageView {
 
 	/**
 	 * Set the min zoom multiplier. Default value: 1.
-	 * @param min min zoom multiplier.
+	 * 
+	 * @param min
+	 *            min zoom multiplier.
 	 */
 	public void setMinZoom(float min) {
 		minScale = min;
@@ -177,8 +179,9 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * For a given point on the view (ie, a touch event), returns the
-	 * point relative to the original drawable's coordinate system.
+	 * For a given point on the view (ie, a touch event), returns the point
+	 * relative to the original drawable's coordinate system.
+	 * 
 	 * @param x
 	 * @param y
 	 * @return PointF relative to original drawable's coordinate system.
@@ -188,8 +191,9 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * For a given point on the view (ie, a touch event), returns the
-	 * point relative to the original drawable's coordinate system.
+	 * For a given point on the view (ie, a touch event), returns the point
+	 * relative to the original drawable's coordinate system.
+	 * 
 	 * @param p
 	 * @return PointF relative to original drawable's coordinate system.
 	 */
@@ -198,8 +202,8 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * Performs boundary checking and fixes the image matrix if it
-	 * is out of bounds.
+	 * Performs boundary checking and fixes the image matrix if it is out of
+	 * bounds.
 	 */
 	private void fixTrans() {
 		matrix.getValues(m);
@@ -215,11 +219,12 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * When transitioning from zooming from focus to zoom from center (or vice versa)
-	 * the image can become unaligned within the view. This is apparent when zooming
-	 * quickly. When the content size is less than the view size, the content will often
-	 * be centered incorrectly within the view. fixScaleTrans first calls fixTrans() and
-	 * then makes sure the image is centered correctly within the view.
+	 * When transitioning from zooming from focus to zoom from center (or vice
+	 * versa) the image can become unaligned within the view. This is apparent
+	 * when zooming quickly. When the content size is less than the view size,
+	 * the content will often be centered incorrectly within the view.
+	 * fixScaleTrans first calls fixTrans() and then makes sure the image is
+	 * centered correctly within the view.
 	 */
 	private void fixScaleTrans() {
 		fixTrans();
@@ -271,7 +276,8 @@ public class TouchImageView extends ImageView {
 	@Override
 	protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 		Drawable drawable = getDrawable();
-		if (drawable == null || drawable.getIntrinsicWidth() == 0 || drawable.getIntrinsicHeight() == 0) {
+		if (drawable == null || drawable.getIntrinsicWidth() == 0
+				|| drawable.getIntrinsicHeight() == 0) {
 			return;
 		}
 
@@ -317,8 +323,10 @@ public class TouchImageView extends ImageView {
 			//
 			// Rescale Matrix after rotation
 			//
-			m[Matrix.MSCALE_X] = matchViewWidth / drawableWidth * normalizedScale;
-			m[Matrix.MSCALE_Y] = matchViewHeight / drawableHeight * normalizedScale;
+			m[Matrix.MSCALE_X] = matchViewWidth / drawableWidth
+					* normalizedScale;
+			m[Matrix.MSCALE_Y] = matchViewHeight / drawableHeight
+					* normalizedScale;
 
 			//
 			// TransX and TransY from previous matrix
@@ -331,14 +339,18 @@ public class TouchImageView extends ImageView {
 			//
 			float prevActualWidth = prevMatchViewWidth * normalizedScale;
 			float actualWidth = getImageWidth();
-			translateMatrixAfterRotate(Matrix.MTRANS_X, transX, prevActualWidth, actualWidth, prevViewWidth, viewWidth, drawableWidth);
+			translateMatrixAfterRotate(Matrix.MTRANS_X, transX,
+					prevActualWidth, actualWidth, prevViewWidth, viewWidth,
+					drawableWidth);
 
 			//
 			// Height
 			//
 			float prevActualHeight = prevMatchViewHeight * normalizedScale;
 			float actualHeight = getImageHeight();
-			translateMatrixAfterRotate(Matrix.MTRANS_Y, transY, prevActualHeight, actualHeight, prevViewHeight, viewHeight, drawableHeight);
+			translateMatrixAfterRotate(Matrix.MTRANS_Y, transY,
+					prevActualHeight, actualHeight, prevViewHeight, viewHeight,
+					drawableHeight);
 
 			//
 			// Set the matrix to the adjusted scale and translate values.
@@ -380,37 +392,52 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * After rotating, the matrix needs to be translated. This function finds the area of image
-	 * which was previously centered and adjusts translations so that is again the center, post-rotation.
+	 * After rotating, the matrix needs to be translated. This function finds
+	 * the area of image which was previously centered and adjusts translations
+	 * so that is again the center, post-rotation.
 	 * 
-	 * @param axis Matrix.MTRANS_X or Matrix.MTRANS_Y
-	 * @param trans the value of trans in that axis before the rotation
-	 * @param prevImageSize the width/height of the image before the rotation
-	 * @param imageSize width/height of the image after rotation
-	 * @param prevViewSize width/height of view before rotation
-	 * @param viewSize width/height of view after rotation
-	 * @param drawableSize width/height of drawable
+	 * @param axis
+	 *            Matrix.MTRANS_X or Matrix.MTRANS_Y
+	 * @param trans
+	 *            the value of trans in that axis before the rotation
+	 * @param prevImageSize
+	 *            the width/height of the image before the rotation
+	 * @param imageSize
+	 *            width/height of the image after rotation
+	 * @param prevViewSize
+	 *            width/height of view before rotation
+	 * @param viewSize
+	 *            width/height of view after rotation
+	 * @param drawableSize
+	 *            width/height of drawable
 	 */
-	private void translateMatrixAfterRotate(int axis, float trans, float prevImageSize, float imageSize, int prevViewSize, int viewSize, int drawableSize) {
+	private void translateMatrixAfterRotate(int axis, float trans,
+			float prevImageSize, float imageSize, int prevViewSize,
+			int viewSize, int drawableSize) {
 		if (imageSize < viewSize) {
 			//
-			// The width/height of image is less than the view's width/height. Center it.
+			// The width/height of image is less than the view's width/height.
+			// Center it.
 			//
 			m[axis] = (viewSize - (drawableSize * m[Matrix.MSCALE_X])) * 0.5f;
 
 		} else if (trans > 0) {
 			//
-			// The image is larger than the view, but was not before rotation. Center it.
+			// The image is larger than the view, but was not before rotation.
+			// Center it.
 			//
 			m[axis] = -((imageSize - viewSize) * 0.5f);
 
 		} else {
 			//
-			// Find the area of the image which was previously centered in the view. Determine its distance
-			// from the left/top side of the view as a fraction of the entire image's width/height. Use that percentage
+			// Find the area of the image which was previously centered in the
+			// view. Determine its distance
+			// from the left/top side of the view as a fraction of the entire
+			// image's width/height. Use that percentage
 			// to calculate the trans in the new view width/height.
 			//
-			float percentage = (Math.abs(trans) + (0.5f * prevViewSize)) / prevImageSize;
+			float percentage = (Math.abs(trans) + (0.5f * prevViewSize))
+					/ prevImageSize;
 			m[axis] = -((percentage * imageSize) - (viewSize * 0.5f));
 		}
 	}
@@ -422,30 +449,31 @@ public class TouchImageView extends ImageView {
 	/**
 	 * Gesture Listener detects a single click or long click and passes that on
 	 * to the view's listener.
+	 * 
 	 * @author Ortiz
-	 *
+	 * 
 	 */
-	private class GestureListener extends GestureDetector.SimpleOnGestureListener {
+	private class GestureListener extends
+			GestureDetector.SimpleOnGestureListener {
 
 		@Override
-		public boolean onSingleTapConfirmed(MotionEvent e)
-		{
-			fullScreenViewActivity.onClick(e);
+		public boolean onSingleTapConfirmed(MotionEvent e) {
+			printMatrixInfo();
 			return performClick();
 		}
 
 		@Override
-		public void onLongPress(MotionEvent e)
-		{
+		public void onLongPress(MotionEvent e) {
 			performLongClick();
 		}
 
 		@Override
-		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY)
-		{
+		public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX,
+				float velocityY) {
 			if (fling != null) {
 				//
-				// If a previous fling is still active, it should be cancelled so that two flings
+				// If a previous fling is still active, it should be cancelled
+				// so that two flings
 				// are not run simultaenously.
 				//
 				fling.cancelFling();
@@ -458,9 +486,11 @@ public class TouchImageView extends ImageView {
 		@Override
 		public boolean onDoubleTap(MotionEvent e) {
 			boolean consumed = false;
-			if (state == State.NONE) {
-				float targetZoom = (normalizedScale == minScale) ? maxScale : minScale;
-				DoubleTapZoom doubleTap = new DoubleTapZoom(normalizedScale, targetZoom, e.getX(), e.getY(), false);
+			if (state == NONE) {
+				float targetZoom = (normalizedScale == minScale) ? maxScale
+						: minScale;
+				DoubleTapZoom doubleTap = new DoubleTapZoom(normalizedScale,
+						targetZoom, e.getX(), e.getY(), false);
 				compatPostOnAnimation(doubleTap);
 				consumed = true;
 			}
@@ -469,10 +499,11 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * Responsible for all touch events. Handles the heavy lifting of drag and also sends
-	 * touch events to Scale Detector and Gesture Detector.
+	 * Responsible for all touch events. Handles the heavy lifting of drag and
+	 * also sends touch events to Scale Detector and Gesture Detector.
+	 * 
 	 * @author Ortiz
-	 *
+	 * 
 	 */
 	private class TouchImageViewListener implements OnTouchListener {
 
@@ -483,26 +514,27 @@ public class TouchImageView extends ImageView {
 
 		@Override
 		public boolean onTouch(View v, MotionEvent event) {
-			getParent().requestDisallowInterceptTouchEvent(true);
 			mScaleDetector.onTouchEvent(event);
 			mGestureDetector.onTouchEvent(event);
 			PointF curr = new PointF(event.getX(), event.getY());
 
-			if (state == State.NONE || state == State.DRAG || state == State.FLING) {
+			if (state == NONE || state == DRAG || state == FLING) {
 				switch (event.getAction()) {
 				case MotionEvent.ACTION_DOWN:
 					last.set(curr);
 					if (fling != null)
 						fling.cancelFling();
-					setState(State.DRAG);
+					setState(DRAG);
 					break;
 
 				case MotionEvent.ACTION_MOVE:
-					if (state == State.DRAG) {
+					if (state == DRAG) {
 						float deltaX = curr.x - last.x;
 						float deltaY = curr.y - last.y;
-						float fixTransX = getFixDragTrans(deltaX, viewWidth, getImageWidth());
-						float fixTransY = getFixDragTrans(deltaY, viewHeight, getImageHeight());
+						float fixTransX = getFixDragTrans(deltaX, viewWidth,
+								getImageWidth());
+						float fixTransY = getFixDragTrans(deltaY, viewHeight,
+								getImageHeight());
 						matrix.postTranslate(fixTransX, fixTransY);
 						fixTrans();
 						last.set(curr.x, curr.y);
@@ -511,7 +543,7 @@ public class TouchImageView extends ImageView {
 
 				case MotionEvent.ACTION_UP:
 				case MotionEvent.ACTION_POINTER_UP:
-					setState(State.NONE);
+					setState(NONE);
 					break;
 				}
 			}
@@ -527,26 +559,29 @@ public class TouchImageView extends ImageView {
 
 	/**
 	 * ScaleListener detects user two finger scaling and scales image.
+	 * 
 	 * @author Ortiz
-	 *
+	 * 
 	 */
-	private class ScaleListener extends ScaleGestureDetector.SimpleOnScaleGestureListener {
+	private class ScaleListener extends
+			ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
-			setState(State.ZOOM);
+			setState(ZOOM);
 			return true;
 		}
 
 		@Override
 		public boolean onScale(ScaleGestureDetector detector) {
-			scaleImage(detector.getScaleFactor(), detector.getFocusX(), detector.getFocusY(), true);
+			scaleImage(detector.getScaleFactor(), detector.getFocusX(),
+					detector.getFocusY(), true);
 			return true;
 		}
 
 		@Override
 		public void onScaleEnd(ScaleGestureDetector detector) {
 			super.onScaleEnd(detector);
-			setState(State.NONE);
+			setState(NONE);
 			boolean animateToZoomBoundary = false;
 			float targetZoom = normalizedScale;
 			if (normalizedScale > maxScale) {
@@ -559,13 +594,15 @@ public class TouchImageView extends ImageView {
 			}
 
 			if (animateToZoomBoundary) {
-				DoubleTapZoom doubleTap = new DoubleTapZoom(normalizedScale, targetZoom, viewWidth / 2, viewHeight / 2, true);
+				DoubleTapZoom doubleTap = new DoubleTapZoom(normalizedScale,
+						targetZoom, viewWidth / 2, viewHeight / 2, true);
 				compatPostOnAnimation(doubleTap);
 			}
 		}
 	}
 
-	private void scaleImage(float deltaScale, float focusX, float focusY, boolean stretchImageToSuper) {
+	private void scaleImage(float deltaScale, float focusX, float focusY,
+			boolean stretchImageToSuper) {
 
 		float lowerScale, upperScale;
 		if (stretchImageToSuper) {
@@ -592,10 +629,11 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * DoubleTapZoom calls a series of runnables which apply
-	 * an animated zoom in/out graphic to the image.
+	 * DoubleTapZoom calls a series of runnables which apply an animated zoom
+	 * in/out graphic to the image.
+	 * 
 	 * @author Ortiz
-	 *
+	 * 
 	 */
 	private class DoubleTapZoom implements Runnable {
 
@@ -608,13 +646,15 @@ public class TouchImageView extends ImageView {
 		private final PointF startTouch;
 		private final PointF endTouch;
 
-		DoubleTapZoom(float startZoom, float targetZoom, float focusX, float focusY, boolean stretchImageToSuper) {
-			setState(State.ANIMATE_ZOOM);
+		DoubleTapZoom(float startZoom, float targetZoom, float focusX,
+				float focusY, boolean stretchImageToSuper) {
+			setState(ANIMATE_ZOOM);
 			startTime = System.currentTimeMillis();
 			this.startZoom = startZoom;
 			this.targetZoom = targetZoom;
 			this.stretchImageToSuper = stretchImageToSuper;
-			PointF bitmapPoint = transformCoordTouchToBitmap(focusX, focusY, false);
+			PointF bitmapPoint = transformCoordTouchToBitmap(focusX, focusY,
+					false);
 			this.bitmapX = bitmapPoint.x;
 			this.bitmapY = bitmapPoint.y;
 
@@ -644,14 +684,15 @@ public class TouchImageView extends ImageView {
 				//
 				// Finished zooming
 				//
-				setState(State.NONE);
+				setState(NONE);
 			}
 		}
 
 		/**
-		 * Interpolate between where the image should start and end in order to translate
-		 * the image so that the point that is touched is what ends up centered at the end
-		 * of the zoom.
+		 * Interpolate between where the image should start and end in order to
+		 * translate the image so that the point that is touched is what ends up
+		 * centered at the end of the zoom.
+		 * 
 		 * @param t
 		 */
 		private void translateImageToCenterTouchPosition(float t) {
@@ -663,6 +704,7 @@ public class TouchImageView extends ImageView {
 
 		/**
 		 * Use interpolator to get t
+		 * 
 		 * @return
 		 */
 		private float interpolate() {
@@ -673,8 +715,9 @@ public class TouchImageView extends ImageView {
 		}
 
 		/**
-		 * Interpolate the current targeted zoom and get the delta
-		 * from the current zoom.
+		 * Interpolate the current targeted zoom and get the delta from the
+		 * current zoom.
+		 * 
 		 * @param t
 		 * @return
 		 */
@@ -685,15 +728,21 @@ public class TouchImageView extends ImageView {
 	}
 
 	/**
-	 * This function will transform the coordinates in the touch event to the coordinate
-	 * system of the drawable that the imageview contain
-	 * @param x x-coordinate of touch event
-	 * @param y y-coordinate of touch event
-	 * @param clipToBitmap Touch event may occur within view, but outside image content. True, to clip return value
-	 * 			to the bounds of the bitmap size.
-	 * @return Coordinates of the point touched, in the coordinate system of the original drawable.
+	 * This function will transform the coordinates in the touch event to the
+	 * coordinate system of the drawable that the imageview contain
+	 * 
+	 * @param x
+	 *            x-coordinate of touch event
+	 * @param y
+	 *            y-coordinate of touch event
+	 * @param clipToBitmap
+	 *            Touch event may occur within view, but outside image content.
+	 *            True, to clip return value to the bounds of the bitmap size.
+	 * @return Coordinates of the point touched, in the coordinate system of the
+	 *         original drawable.
 	 */
-	private PointF transformCoordTouchToBitmap(float x, float y, boolean clipToBitmap) {
+	private PointF transformCoordTouchToBitmap(float x, float y,
+			boolean clipToBitmap) {
 		matrix.getValues(m);
 		float origW = getDrawable().getIntrinsicWidth();
 		float origH = getDrawable().getIntrinsicHeight();
@@ -707,14 +756,18 @@ public class TouchImageView extends ImageView {
 			finalY = Math.min(Math.max(y, 0), origH);
 		}
 
-		return new PointF(finalX , finalY);
+		return new PointF(finalX, finalY);
 	}
 
 	/**
-	 * Inverse of transformCoordTouchToBitmap. This function will transform the coordinates in the
-	 * drawable's coordinate system to the view's coordinate system.
-	 * @param bx x-coordinate in original bitmap coordinate system
-	 * @param by y-coordinate in original bitmap coordinate system
+	 * Inverse of transformCoordTouchToBitmap. This function will transform the
+	 * coordinates in the drawable's coordinate system to the view's coordinate
+	 * system.
+	 * 
+	 * @param bx
+	 *            x-coordinate in original bitmap coordinate system
+	 * @param by
+	 *            y-coordinate in original bitmap coordinate system
 	 * @return Coordinates of the point in the view's coordinate system.
 	 */
 	private PointF transformCoordBitmapToTouch(float bx, float by) {
@@ -725,15 +778,15 @@ public class TouchImageView extends ImageView {
 		float py = by / origH;
 		float finalX = m[Matrix.MTRANS_X] + getImageWidth() * px;
 		float finalY = m[Matrix.MTRANS_Y] + getImageHeight() * py;
-		return new PointF(finalX , finalY);
+		return new PointF(finalX, finalY);
 	}
 
 	/**
-	 * Fling launches sequential runnables which apply
-	 * the fling graphic to the image. The values for the translation
-	 * are interpolated by the Scroller.
+	 * Fling launches sequential runnables which apply the fling graphic to the
+	 * image. The values for the translation are interpolated by the Scroller.
+	 * 
 	 * @author Ortiz
-	 *
+	 * 
 	 */
 	private class Fling implements Runnable {
 
@@ -741,7 +794,7 @@ public class TouchImageView extends ImageView {
 		int currX, currY;
 
 		Fling(int velocityX, int velocityY) {
-			setState(State.FLING);
+			setState(FLING);
 			scroller = new Scroller(context);
 			matrix.getValues(m);
 
@@ -765,15 +818,15 @@ public class TouchImageView extends ImageView {
 				minY = maxY = startY;
 			}
 
-			scroller.fling(startX, startY, velocityX, velocityY, minX,
-					maxX, minY, maxY);
+			scroller.fling(startX, startY, velocityX, velocityY, minX, maxX,
+					minY, maxY);
 			currX = startX;
 			currY = startY;
 		}
 
 		public void cancelFling() {
 			if (scroller != null) {
-				setState(State.NONE);
+				setState(NONE);
 				scroller.forceFinished(true);
 			}
 		}
@@ -806,12 +859,38 @@ public class TouchImageView extends ImageView {
 			postOnAnimation(runnable);
 
 		} else {
-			postDelayed(runnable, 1000/60);
+			postDelayed(runnable, 1000 / 60);
 		}
 	}
 
 	private void printMatrixInfo() {
 		matrix.getValues(m);
-		Log.d(DEBUG, "Scale: " + m[Matrix.MSCALE_X] + " TransX: " + m[Matrix.MTRANS_X] + " TransY: " + m[Matrix.MTRANS_Y]);
+		Log.d(DEBUG, "Scale: " + m[Matrix.MSCALE_X] + " TransX: "
+				+ m[Matrix.MTRANS_X] + " TransY: " + m[Matrix.MTRANS_Y]);
 	}
+
+	public boolean avoidTurnPage(int direction) {
+
+		matrix.getValues(m);
+
+		float x = Math.abs(m[Matrix.MTRANS_X]);
+
+		// float scaleWidth = Math.round(getImageWidth() * m[Matrix.MSCALE_X]);
+
+		Log.d("DEBUG", "x: " + x);
+		Log.d("DEBUG", "direction: " + direction);
+		// Log.d("DEBUG", "scaleWidth: " + scaleWidth);
+		Log.d("DEBUG", "getImageWidth(): " + getImageWidth());
+		Log.d("DEBUG", "matchViewWidth: " + matchViewWidth);
+
+		if (x - direction <= 0) {
+			return false; // reach left edge
+		} else if (x + matchViewWidth - direction >= getImageWidth()) {
+			return false; // reach right edge
+		}
+
+		return true;
+
+	}
+
 }
