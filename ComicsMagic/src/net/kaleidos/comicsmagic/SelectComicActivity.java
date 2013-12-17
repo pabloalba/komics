@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 import net.kaleidos.comicsmagic.adapter.ComicAdapter;
-import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -173,53 +172,15 @@ public class SelectComicActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		int fitStyle = AppConstant.FIT_WIDTH;
-		item.setChecked(true);
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.fit_width:
-			fitStyle = AppConstant.FIT_WIDTH;
-			break;
-		case R.id.fit_height:
-			fitStyle = AppConstant.FIT_HEIGHT;
-			break;
-		case R.id.fit_image:
-			fitStyle = AppConstant.FIT_IMAGE;
-			break;
-		case R.id.fit_magic:
-			fitStyle = AppConstant.FIT_MAGIC;
-		}
-		editPreferences.putInt("fitStyle", fitStyle);
-		editPreferences.commit();
+		Utils.saveFitPreferenceFromMenu(item, editPreferences);
 		return true;
 	}
 
 	@Override
-	public boolean onMenuOpened(int featureId, Menu menu) {
-		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
-		if (super.onMenuOpened(featureId, menu)) {
-			int id = -1;
-			switch (fitStyle) {
-			case AppConstant.FIT_WIDTH:
-				id = R.id.fit_width;
-				break;
-			case AppConstant.FIT_HEIGHT:
-				id = R.id.fit_height;
-				break;
-			case AppConstant.FIT_IMAGE:
-				id = R.id.fit_image;
-				break;
-			case AppConstant.FIT_MAGIC:
-				id = R.id.fit_magic;
-				break;
-			}
-
-			if (id != -1) {
-				menu.findItem(id).setChecked(true);
-			}
-			return true;
-		}
-		return false;
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		Utils.markSelectedItemAsChecked(menu, preferences);
+		return true;
 	}
 
 }

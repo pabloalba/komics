@@ -115,25 +115,12 @@ public class FullScreenViewActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		item.setChecked(true);
-		// Handle item selection
-		switch (item.getItemId()) {
-		case R.id.fit_width:
-			fitStyle = AppConstant.FIT_WIDTH;
-			break;
-		case R.id.fit_height:
-			fitStyle = AppConstant.FIT_HEIGHT;
-			break;
-		case R.id.fit_image:
-			fitStyle = AppConstant.FIT_IMAGE;
-			break;
-		case R.id.fit_magic:
-			fitStyle = AppConstant.FIT_MAGIC;
+		int menuFitStyle = Utils.saveFitPreferenceFromMenu(item,
+				editPreferences);
+		if (menuFitStyle != -1) {
+			fitStyle = menuFitStyle;
+			regenerateAdapterPage(viewPager.getCurrentItem());
 		}
-		editPreferences.putInt("fitStyle", fitStyle);
-		editPreferences.commit();
-
-		regenerateAdapterPage(viewPager.getCurrentItem());
 		return true;
 	}
 

@@ -12,14 +12,18 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.helper.extractor.RarExtractor;
 import net.kaleidos.comicsmagic.helper.extractor.ZipExtractor;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
 import android.view.Display;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.WindowManager;
 
 public class Utils {
@@ -251,6 +255,57 @@ public class Utils {
 		options.inInputShareable = true;
 
 		return BitmapFactory.decodeByteArray(byteArr, 0, count, options);
+	}
+
+	public static void markSelectedItemAsChecked(Menu menu,
+			SharedPreferences preferences) {
+		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
+
+		int id = -1;
+		switch (fitStyle) {
+		case AppConstant.FIT_WIDTH:
+			id = R.id.fit_width;
+			break;
+		case AppConstant.FIT_HEIGHT:
+			id = R.id.fit_height;
+			break;
+		case AppConstant.FIT_IMAGE:
+			id = R.id.fit_image;
+			break;
+		case AppConstant.FIT_MAGIC:
+			id = R.id.fit_magic;
+			break;
+		}
+
+		if (id != -1) {
+			if (menu != null && menu.findItem(id) != null) {
+				menu.findItem(id).setChecked(true);
+			}
+		}
+
+	}
+
+	public static int saveFitPreferenceFromMenu(MenuItem item,
+			SharedPreferences.Editor editPreferences) {
+		int fitStyle = -1;
+		item.setChecked(true);
+		// Handle item selection
+		switch (item.getItemId()) {
+		case R.id.fit_width:
+			fitStyle = AppConstant.FIT_WIDTH;
+			break;
+		case R.id.fit_height:
+			fitStyle = AppConstant.FIT_HEIGHT;
+			break;
+		case R.id.fit_image:
+			fitStyle = AppConstant.FIT_IMAGE;
+			break;
+		case R.id.fit_magic:
+			fitStyle = AppConstant.FIT_MAGIC;
+		}
+		editPreferences.putInt("fitStyle", fitStyle);
+		editPreferences.commit();
+		return fitStyle;
 	}
 
 }
