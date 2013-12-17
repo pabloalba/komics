@@ -90,6 +90,12 @@ public class TouchImageView extends ImageView {
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mGestureDetector;
 
+	private OnTouchListener externalTouchListener;
+
+	public void setExternalTouchListener(OnTouchListener externalTouchListener) {
+		this.externalTouchListener = externalTouchListener;
+	}
+
 	public TouchImageView(Context context) {
 		super(context);
 		sharedConstructing(context);
@@ -458,7 +464,7 @@ public class TouchImageView extends ImageView {
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
-			printMatrixInfo();
+			externalTouchListener.onTouch(TouchImageView.this, e);
 			return performClick();
 		}
 

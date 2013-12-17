@@ -17,6 +17,7 @@ import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
@@ -27,6 +28,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 	private LayoutInflater inflater;
 	private TouchImageView imgDisplay;
 	private int fitStyle = AppConstant.FIT_WIDTH;
+	private final OnTouchListener onTouchListener;
 
 	public int getFitStyle() {
 		return fitStyle;
@@ -39,10 +41,12 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
 	// constructor
 	public FullScreenImageAdapter(Activity activity,
-			ArrayList<String> imagePaths, int fitStyle) {
+			ArrayList<String> imagePaths, int fitStyle,
+			OnTouchListener onTouchListener) {
 		this._activity = activity;
 		this._imagePaths = imagePaths;
 		this.fitStyle = fitStyle;
+		this.onTouchListener = onTouchListener;
 	}
 
 	@Override
@@ -65,6 +69,8 @@ public class FullScreenImageAdapter extends PagerAdapter {
 		imgDisplay.setBackgroundColor(Color.BLACK);
 		// imgDisplay.setFitStyle(fitStyle);
 		imgDisplay.setMaxZoom(8f);
+
+		imgDisplay.setExternalTouchListener(onTouchListener);
 
 		try {
 			File f = new File(_imagePaths.get(position));

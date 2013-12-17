@@ -10,12 +10,15 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
+import android.view.View;
+import android.view.View.OnTouchListener;
 
-public class FullScreenViewActivity extends Activity{
+public class FullScreenViewActivity extends Activity {
 
 	private Utils utils;
 	private FullScreenImageAdapter adapter;
@@ -23,6 +26,7 @@ public class FullScreenViewActivity extends Activity{
 	SharedPreferences preferences;
 	SharedPreferences.Editor editPreferences;
 	float middleX;
+	OnTouchListener touchListener;
 
 	int fitStyle = AppConstant.FIT_WIDTH;
 	ArrayList<String> fileNames;
@@ -49,17 +53,38 @@ public class FullScreenViewActivity extends Activity{
 
 		middleX = utils.getScreenWidth() / 2;
 
-
 	}
 
-	private void regenerateAdapterPage(int number){
+	private OnTouchListener getTouchListener() {
+		if (touchListener == null) {
+			touchListener = new OnTouchListener() {
+				@Override
+				public boolean onTouch(View v, MotionEvent e) {
+					Log.d("DEBUG", "onTouch");
+					int number = viewPager.getCurrentItem();
+
+					if ((e.getX() < middleX) && (number > 0)) {
+						viewPager.setCurrentItem(number - 1, true);
+					}
+					if ((e.getX() > middleX) && (number < fileNames.size() - 1)) {
+						viewPager.setCurrentItem(number + 1, true);
+					}
+					return true;
+				}
+			};
+		}
+		return touchListener;
+	}
+
+	private void regenerateAdapterPage(int number) {
 		adapter = new FullScreenImageAdapter(FullScreenViewActivity.this,
-				fileNames, fitStyle);
+				fileNames, fitStyle, getTouchListener());
 
 		viewPager.setAdapter(adapter);
 
 		// displaying selected image first
 		viewPager.setCurrentItem(number);
+
 	}
 
 	@Override
@@ -93,11 +118,10 @@ public class FullScreenViewActivity extends Activity{
 		return true;
 	}
 
-
 	@Override
 	public boolean onMenuOpened(int featureId, Menu menu) {
 		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
-		if (super.onMenuOpened(featureId, menu)){
+		if (super.onMenuOpened(featureId, menu)) {
 			int id = -1;
 			switch (fitStyle) {
 			case AppConstant.FIT_WIDTH:
@@ -120,19 +144,6 @@ public class FullScreenViewActivity extends Activity{
 			return true;
 		}
 		return false;
-	}
-
-	public void onClick(MotionEvent e){
-
-		int number = viewPager.getCurrentItem();
-
-		if ((e.getX()<middleX) && (number>0)) {
-			viewPager.setCurrentItem(number - 1);
-		}
-		if ((e.getX()>middleX) && (number<fileNames.size()-1)) {
-			viewPager.setCurrentItem(number + 1);
-		}
-
 	}
 
 }
