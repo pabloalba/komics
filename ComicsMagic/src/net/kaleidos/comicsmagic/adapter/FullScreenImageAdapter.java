@@ -71,6 +71,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 		imgDisplay.setMaxZoom(8f);
 
 		imgDisplay.setExternalTouchListener(onTouchListener);
+		imgDisplay.setFitStyle(fitStyle);
 
 		try {
 			File f = new File(_imagePaths.get(position));

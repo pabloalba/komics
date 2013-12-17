@@ -15,6 +15,7 @@ import static net.kaleidos.comicsmagic.components.TouchImageView.State.DRAG;
 import static net.kaleidos.comicsmagic.components.TouchImageView.State.FLING;
 import static net.kaleidos.comicsmagic.components.TouchImageView.State.NONE;
 import static net.kaleidos.comicsmagic.components.TouchImageView.State.ZOOM;
+import net.kaleidos.comicsmagic.helper.AppConstant;
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Matrix;
@@ -91,6 +92,16 @@ public class TouchImageView extends ImageView {
 	private GestureDetector mGestureDetector;
 
 	private OnTouchListener externalTouchListener;
+
+	int fitStyle;
+
+	public int getFitStyle() {
+		return fitStyle;
+	}
+
+	public void setFitStyle(int fitStyle) {
+		this.fitStyle = fitStyle;
+	}
 
 	public void setExternalTouchListener(OnTouchListener externalTouchListener) {
 		this.externalTouchListener = externalTouchListener;
@@ -307,6 +318,16 @@ public class TouchImageView extends ImageView {
 		float scaleX = (float) viewWidth / drawableWidth;
 		float scaleY = (float) viewHeight / drawableHeight;
 		float scale = Math.min(scaleX, scaleY);
+
+		if (fitStyle == AppConstant.FIT_WIDTH) {
+			scale = scaleX;
+		} else if (fitStyle == AppConstant.FIT_HEIGHT) {
+			scale = scaleY;
+		} else if (fitStyle == AppConstant.FIT_IMAGE) {
+			scale = Math.min(scaleX, scaleY);
+		} else { // FitMagic
+			scale = Math.min(scaleX, scaleY);
+		}
 
 		//
 		// Center the image
