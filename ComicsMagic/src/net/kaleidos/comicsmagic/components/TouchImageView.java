@@ -342,7 +342,7 @@ public class TouchImageView extends ImageView {
 			// Stretch and center image to fit view
 			//
 			matrix.setScale(scale, scale);
-			matrix.postTranslate(redundantXSpace / 2, redundantYSpace / 2);
+			matrix.postTranslate(redundantXSpace / 2, 0);
 
 		} else {
 			prevMatrix.getValues(m);
@@ -897,18 +897,8 @@ public class TouchImageView extends ImageView {
 	}
 
 	public boolean avoidTurnPage(int direction) {
-
 		matrix.getValues(m);
-
 		float x = Math.abs(m[Matrix.MTRANS_X]);
-
-		// float scaleWidth = Math.round(getImageWidth() * m[Matrix.MSCALE_X]);
-
-		Log.d("DEBUG", "x: " + x);
-		Log.d("DEBUG", "direction: " + direction);
-		// Log.d("DEBUG", "scaleWidth: " + scaleWidth);
-		Log.d("DEBUG", "getImageWidth(): " + getImageWidth());
-		Log.d("DEBUG", "matchViewWidth: " + matchViewWidth);
 
 		if (x - direction <= 0) {
 			return false; // reach left edge
