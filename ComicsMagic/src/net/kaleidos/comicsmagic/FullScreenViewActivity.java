@@ -8,15 +8,17 @@ import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Point;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.ViewConfiguration;
+import android.view.Window;
 
 public class FullScreenViewActivity extends Activity {
 
@@ -26,6 +28,7 @@ public class FullScreenViewActivity extends Activity {
 	SharedPreferences preferences;
 	SharedPreferences.Editor editPreferences;
 	float middleX;
+	float topQuarter;
 	OnTouchListener touchListener;
 
 	int fitStyle = AppConstant.FIT_WIDTH;
@@ -34,8 +37,9 @@ public class FullScreenViewActivity extends Activity {
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
-		setContentView(R.layout.activity_fullscreen_view);
+		setFullScreen(true);
 
+		setContentView(R.layout.activity_fullscreen_view);
 		viewPager = (ViewPager) findViewById(R.id.pager);
 
 		utils = new Utils(getApplicationContext());
@@ -50,8 +54,9 @@ public class FullScreenViewActivity extends Activity {
 
 		fileNames = utils.getAllImagesFile(fileName);
 		regenerateAdapterPage(number);
-
-		middleX = utils.getScreenWidth() / 2;
+		Point size = utils.getScreenSize();
+		middleX = size.x / 2;
+		topQuarter = size.y / 4;
 
 	}
 
@@ -60,9 +65,23 @@ public class FullScreenViewActivity extends Activity {
 			touchListener = new OnTouchListener() {
 				@Override
 				public boolean onTouch(View v, MotionEvent e) {
-					Log.d("DEBUG", "onTouch");
-					int number = viewPager.getCurrentItem();
 
+					if (!isFullScreen()) {
+						setFullScreen(true);
+						return true;
+					}
+
+					// If the isn't a physical menu button, show the action bar
+					// when taping the top of the image
+					if (!ViewConfiguration.get(getApplicationContext())
+							.hasPermanentMenuKey()) {
+						if (e.getY() < topQuarter) {
+							setFullScreen(false);
+							return true;
+						}
+					}
+
+					int number = viewPager.getCurrentItem();
 					if ((e.getX() < middleX) && (number > 0)) {
 						viewPager.setCurrentItem(number - 1, true);
 					}
@@ -144,6 +163,25 @@ public class FullScreenViewActivity extends Activity {
 			return true;
 		}
 		return false;
+	}
+
+	public boolean isFullScreen() {
+		return !getActionBar().isShowing();
+	}
+
+	public void setFullScreen(boolean full) {
+		if (full == isFullScreen()) {
+			return;
+		}
+
+		Window window = getWindow();
+		if (full) {
+			// window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getActionBar().hide();
+		} else {
+			// window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+			getActionBar().show();
+		}
 	}
 
 }

@@ -40,22 +40,20 @@ public class Utils {
 		// Check for count
 		if (listFiles.length > 0) {
 
-
-			Arrays.sort(listFiles, new Comparator<File>(){
+			Arrays.sort(listFiles, new Comparator<File>() {
 				@Override
-				public int compare(File f1, File f2)
-				{
-					//First folders
-					if (f1.isDirectory() && !f2.isDirectory()){
+				public int compare(File f1, File f2) {
+					// First folders
+					if (f1.isDirectory() && !f2.isDirectory()) {
 						return -1;
 					}
-					if (!f1.isDirectory() && f2.isDirectory()){
+					if (!f1.isDirectory() && f2.isDirectory()) {
 						return 1;
 					}
 
 					return f1.getName().compareToIgnoreCase(f2.getName());
-				} });
-
+				}
+			});
 
 			// loop through all files
 			for (int i = 0; i < listFiles.length; i++) {
@@ -64,22 +62,21 @@ public class Utils {
 				String filePath = listFiles[i].getAbsolutePath();
 
 				// check for supported file extension
-				if (listFiles[i].canRead() &&
-						((isSupportedFile(filePath, AppConstant.COMIC_EXTN)) ||
-								listFiles[i].isDirectory())){
+				if (listFiles[i].canRead()
+						&& ((isSupportedFile(filePath, AppConstant.COMIC_EXTN)) || listFiles[i]
+								.isDirectory())) {
 					// Add image path to array list
 					files.add(listFiles[i]);
 				}
 			}
 		}
 
-		//Add "go back" on first position
-		if (directory.getParent() != null){
+		// Add "go back" on first position
+		if (directory.getParent() != null) {
 			files.add(0, new File(directory.getParent()));
 		} else {
 			files.add(0, directory);
 		}
-
 
 		return files;
 	}
@@ -97,8 +94,7 @@ public class Utils {
 	 * getting screen width
 	 */
 	@SuppressLint("NewApi")
-	public int getScreenWidth() {
-		int columnWidth;
+	public Point getScreenSize() {
 		WindowManager wm = (WindowManager) _context
 				.getSystemService(Context.WINDOW_SERVICE);
 		Display display = wm.getDefaultDisplay();
@@ -110,21 +106,19 @@ public class Utils {
 			point.x = display.getWidth();
 			point.y = display.getHeight();
 		}
-		columnWidth = point.x;
-		return columnWidth;
+		return point;
 	}
 
 	public File getFirstImageFile(File file) {
-		if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)){
+		if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)) {
 			return ZipExtractor.getFirstImageFile(file, _context);
-		} else if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_RAR)){
+		} else if (Utils.isSupportedFile(file.getName(),
+				AppConstant.COMIC_EXTN_RAR)) {
 			return RarExtractor.getFirstImageFile(file, _context);
 		}
 		return null;
 
 	}
-
-
 
 	public ArrayList<String> getAllImagesFile(String fileName) {
 		ArrayList<String> fileNames = new ArrayList<String>();
@@ -132,24 +126,28 @@ public class Utils {
 		File file = new File(fileName);
 		File cacheDir = _context.getCacheDir(); // temp dir
 
-		File comicsDir = new File (cacheDir.getAbsolutePath() + File.separator + "comics");
+		File comicsDir = new File(cacheDir.getAbsolutePath() + File.separator
+				+ "comics");
 		comicsDir.mkdir();
 
-		//Delete old comics
+		// Delete old comics
 		Utils.deleteOldComics(comicsDir);
 
 		String md5Name = Utils.md5(file.getAbsolutePath());
-		File outputDir = new File (comicsDir.getAbsolutePath() + File.separator + md5Name);
+		File outputDir = new File(comicsDir.getAbsolutePath() + File.separator
+				+ md5Name);
 		if (!outputDir.exists()) {
 			outputDir.mkdir();
-			if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)){
+			if (Utils.isSupportedFile(file.getName(),
+					AppConstant.COMIC_EXTN_ZIP)) {
 				fileNames = ZipExtractor.getAllImagesFile(file, outputDir);
-			} else if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_RAR)){
+			} else if (Utils.isSupportedFile(file.getName(),
+					AppConstant.COMIC_EXTN_RAR)) {
 				fileNames = RarExtractor.getAllImagesFile(file, outputDir);
 			}
 		} else {
 			File[] files = outputDir.listFiles();
-			for (int i=0; i<files.length;i++){
+			for (int i = 0; i < files.length; i++) {
 				fileNames.add(files[i].getAbsolutePath());
 			}
 		}
@@ -158,20 +156,22 @@ public class Utils {
 	}
 
 	/**
-	 * Delete comics cache. If there are more than 3 comics stored, delete
-	 * the oldests
+	 * Delete comics cache. If there are more than 3 comics stored, delete the
+	 * oldests
+	 * 
 	 * @param comicsDir
 	 */
-	public static void deleteOldComics(File comicsDir){
+	public static void deleteOldComics(File comicsDir) {
 		File[] files = comicsDir.listFiles();
 		if (files.length > 3) {
-			Arrays.sort(files, new Comparator<File>(){
+			Arrays.sort(files, new Comparator<File>() {
 				@Override
-				public int compare(File f1, File f2)
-				{
-					return Long.valueOf(f1.lastModified()).compareTo(f2.lastModified());
-				} });
-			for (int i =0; i<files.length-3;i++){
+				public int compare(File f1, File f2) {
+					return Long.valueOf(f1.lastModified()).compareTo(
+							f2.lastModified());
+				}
+			});
+			for (int i = 0; i < files.length - 3; i++) {
 				Utils.deleteDir(files[i]);
 			}
 		}
@@ -225,13 +225,13 @@ public class Utils {
 		return "";
 	}
 
-	public static Bitmap readBitmapFromStream(InputStream in) throws IOException{
-		//Read the file to memory
+	public static Bitmap readBitmapFromStream(InputStream in)
+			throws IOException {
+		// Read the file to memory
 		byte[] byteArr = new byte[0];
 		byte[] buffer = new byte[1024];
 		int len;
 		int count = 0;
-
 
 		while ((len = in.read(buffer)) > -1) {
 			if (len != 0) {
@@ -248,7 +248,7 @@ public class Utils {
 
 		final BitmapFactory.Options options = new BitmapFactory.Options();
 		options.inPurgeable = true;
-		options.inInputShareable =true;
+		options.inInputShareable = true;
 
 		return BitmapFactory.decodeByteArray(byteArr, 0, count, options);
 	}

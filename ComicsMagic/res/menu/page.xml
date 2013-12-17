@@ -1,11 +1,11 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android" >
 <item android:id="@+id/fit_style" android:title="@string/fit_style">
     <menu>
-	    <group android:id="@+id/fit_style_group" android:checkableBehavior="single">
-	        <item android:id="@+id/fit_width" android:title="@string/fit_width"></item>
-	        <item android:id="@+id/fit_height" android:title="@string/fit_height"></item>
-	        <item android:id="@+id/fit_image" android:title="@string/fit_image"></item>
-	        <item android:id="@+id/fit_magic" android:title="@string/fit_magic"></item>    
+	    <group android:id="@+id/fit_style_group" android:checkableBehavior="single" android:showAsAction="never">
+	        <item android:id="@+id/fit_width" android:title="@string/fit_width" android:showAsAction="never"></item>
+	        <item android:id="@+id/fit_height" android:title="@string/fit_height" android:showAsAction="never"></item>
+	        <item android:id="@+id/fit_image" android:title="@string/fit_image" android:showAsAction="never"></item>
+	        <item android:id="@+id/fit_magic" android:title="@string/fit_magic" android:showAsAction="never"></item>    
 	    </group>
     </menu>
 </item>
