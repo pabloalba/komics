@@ -473,6 +473,22 @@ public class TouchImageView extends ImageView {
 		this.state = state;
 	}
 
+	public void zoomOut(float x, float y) {
+		DoubleTapZoom zoomOut = new DoubleTapZoom(normalizedScale, minScale, x,
+				y, false);
+		compatPostOnAnimation(zoomOut);
+	}
+
+	public void zoomToPoint(float x, float y, float zoom) {
+
+		CustomZoom zoomOut = new CustomZoom(normalizedScale, zoom, x, y, false);
+		compatPostOnAnimation(zoomOut);
+		Log.e("DEBUG", "targetZoom: " + zoom);
+		Log.e("DEBUG", "x: " + x);
+		Log.e("DEBUG", "y: " + y);
+
+	}
+
 	/**
 	 * Gesture Listener detects a single click or long click and passes that on
 	 * to the view's listener.
@@ -514,12 +530,16 @@ public class TouchImageView extends ImageView {
 		public boolean onDoubleTap(MotionEvent e) {
 			boolean consumed = false;
 			if (state == NONE) {
-				float targetZoom = (normalizedScale == minScale) ? maxScale
+				float targetZoom = (normalizedScale == minScale) ? (maxScale / 1.5f)
 						: minScale;
 				DoubleTapZoom doubleTap = new DoubleTapZoom(normalizedScale,
 						targetZoom, e.getX(), e.getY(), false);
 				compatPostOnAnimation(doubleTap);
 				consumed = true;
+
+				Log.e("DEBUG", "targetZoom: " + targetZoom);
+				Log.e("DEBUG", "x: " + e.getX());
+				Log.e("DEBUG", "y: " + e.getY());
 			}
 			return consumed;
 		}
@@ -667,11 +687,11 @@ public class TouchImageView extends ImageView {
 		private final long startTime;
 		private static final float ZOOM_TIME = 500;
 		private final float startZoom, targetZoom;
-		private final float bitmapX, bitmapY;
+		protected float bitmapX, bitmapY;
 		private final boolean stretchImageToSuper;
 		private final AccelerateDecelerateInterpolator interpolator = new AccelerateDecelerateInterpolator();
-		private final PointF startTouch;
-		private final PointF endTouch;
+		protected PointF startTouch;
+		protected PointF endTouch;
 
 		DoubleTapZoom(float startZoom, float targetZoom, float focusX,
 				float focusY, boolean stretchImageToSuper) {
@@ -752,6 +772,19 @@ public class TouchImageView extends ImageView {
 			float zoom = startZoom + t * (targetZoom - startZoom);
 			return zoom / normalizedScale;
 		}
+	}
+
+	private class CustomZoom extends DoubleTapZoom {
+
+		CustomZoom(float startZoom, float targetZoom, float focusX,
+				float focusY, boolean stretchImageToSuper) {
+			super(startZoom, targetZoom, focusX, focusY, stretchImageToSuper);
+			this.bitmapX = focusX;
+			this.bitmapY = focusY;
+			startTouch = transformCoordBitmapToTouch(bitmapX, bitmapY);
+			endTouch = new PointF(viewWidth / 2, viewHeight / 2);
+		}
+
 	}
 
 	/**

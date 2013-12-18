@@ -1,10 +1,14 @@
 package net.kaleidos.comicsmagic;
 
 import java.util.ArrayList;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import net.kaleidos.comicsmagic.adapter.FullScreenImageAdapter;
+import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
+import net.kaleidos.comicsmagic.scenes.Scene;
 import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
@@ -30,7 +34,7 @@ public class FullScreenViewActivity extends Activity {
 	private ViewPager viewPager;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editPreferences;
-	float middleX;
+	float quarterX;
 	float topQuarter;
 	OnTouchListener touchListener;
 
@@ -38,6 +42,11 @@ public class FullScreenViewActivity extends Activity {
 	ArrayList<String> fileNames;
 
 	String pageNumberName;
+	ArrayList<Scene> scenes = new ArrayList<Scene>();
+	int currentScene = 0;
+
+	private final ScheduledExecutorService scheduler = Executors
+			.newScheduledThreadPool(1);
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -62,8 +71,10 @@ public class FullScreenViewActivity extends Activity {
 		fileNames = utils.getAllImagesFile(fileName);
 		regenerateAdapterPage(number);
 		Point size = utils.getScreenSize();
-		middleX = size.x / 2;
+		quarterX = size.x / 4;
 		topQuarter = size.y / 4;
+
+		recalculateScenes();
 
 		getActionBar().setTitle(
 				getResources().getString(R.string.app_name) + " ("
@@ -109,13 +120,35 @@ public class FullScreenViewActivity extends Activity {
 						setFullScreen(false);
 						return true;
 					} else {
-						int number = viewPager.getCurrentItem();
-						if ((e.getX() < middleX) && (number > 0)) {
-							viewPager.setCurrentItem(number - 1, true);
-						}
-						if ((e.getX() > middleX)
-								&& (number < fileNames.size() - 1)) {
-							viewPager.setCurrentItem(number + 1, true);
+						if (fitStyle != AppConstant.FIT_MAGIC) {
+							// Pass page on tap on the left/right borders of the
+							// screen
+							int number = viewPager.getCurrentItem();
+							if ((e.getX() < quarterX) && (number > 0)) {
+								viewPager.setCurrentItem(number - 1, true);
+							}
+							if ((e.getX() > quarterX * 3)
+									&& (number < fileNames.size() - 1)) {
+								viewPager.setCurrentItem(number + 1, true);
+							}
+						} else {
+							// Magic mode! Pass scene on tap on the left/right
+							// borders of the
+							// screen
+							if ((e.getX() < quarterX) && (currentScene > 0)) {
+								currentScene--;
+								magic(scenes.get(currentScene).getX(), scenes
+										.get(currentScene).getY(),
+										scenes.get(currentScene).getZoom());
+
+							}
+							if ((e.getX() > quarterX * 3)
+									&& (currentScene < scenes.size() - 1)) {
+								currentScene++;
+								magic(scenes.get(currentScene).getX(), scenes
+										.get(currentScene).getY(),
+										scenes.get(currentScene).getZoom());
+							}
 						}
 					}
 					return true;
@@ -154,6 +187,16 @@ public class FullScreenViewActivity extends Activity {
 			if (menuFitStyle != -1) {
 				fitStyle = menuFitStyle;
 				regenerateAdapterPage(viewPager.getCurrentItem());
+				if (fitStyle == AppConstant.FIT_MAGIC) {
+					recalculateScenes();
+					currentScene = 0;
+					/*
+					 * getTouchImageView().zoomToPoint(
+					 * scenes.get(currentScene).getX(),
+					 * scenes.get(currentScene).getY(),
+					 * scenes.get(currentScene).getZoom());
+					 */
+				}
 			}
 		}
 		return true;
@@ -211,5 +254,25 @@ public class FullScreenViewActivity extends Activity {
 		});
 		d.show();
 
+	}
+
+	private void recalculateScenes() {
+		// Sample points
+		scenes.clear();
+		scenes.add(new Scene(100, 400, 5));
+		scenes.add(new Scene(300, 400, 4));
+		scenes.add(new Scene(500, 400, 5));
+		scenes.add(new Scene(100, 500, 2));
+
+	}
+
+	private TouchImageView getTouchImageView() {
+		return (TouchImageView) viewPager.findViewWithTag("imgDisplay"
+				+ viewPager.getCurrentItem());
+
+	}
+
+	private void magic(final float x, final float y, final float zoom) {
+		getTouchImageView().zoomToPoint(x, y, zoom);
 	}
 }
