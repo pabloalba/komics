@@ -6,6 +6,12 @@ import android.util.AttributeSet;
 import android.view.View;
 
 public class ImageViewPager extends ViewPager {
+	private boolean avoidScroll = false;
+
+
+	public void setAvoidScroll(boolean avoidScroll) {
+		this.avoidScroll = avoidScroll;
+	}
 
 	public ImageViewPager(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -17,6 +23,9 @@ public class ImageViewPager extends ViewPager {
 
 	@Override
 	protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
+		if (avoidScroll){
+			return false;
+		}
 		if (v instanceof TouchImageView) {
 			TouchImageView imageView = (TouchImageView) v;
 			return imageView.avoidTurnPage(dx);

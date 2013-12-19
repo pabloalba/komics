@@ -86,7 +86,7 @@ public class TouchImageView extends ImageView {
 	// rotation.
 	//
 	private float matchViewWidth, matchViewHeight, prevMatchViewWidth,
-			prevMatchViewHeight;
+	prevMatchViewHeight;
 
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mGestureDetector;
@@ -94,6 +94,14 @@ public class TouchImageView extends ImageView {
 	private OnTouchListener externalTouchListener;
 
 	int fitStyle;
+
+	public float getMatchViewWidth() {
+		return matchViewWidth;
+	}
+
+	public float getMatchViewHeight() {
+		return matchViewHeight;
+	}
 
 	public int getFitStyle() {
 		return fitStyle;
@@ -282,11 +290,11 @@ public class TouchImageView extends ImageView {
 		return delta;
 	}
 
-	private float getImageWidth() {
+	public float getImageWidth() {
 		return matchViewWidth * normalizedScale;
 	}
 
-	private float getImageHeight() {
+	public float getImageHeight() {
 		return matchViewHeight * normalizedScale;
 	}
 
@@ -483,10 +491,6 @@ public class TouchImageView extends ImageView {
 
 		CustomZoom zoomOut = new CustomZoom(normalizedScale, zoom, x, y, false);
 		compatPostOnAnimation(zoomOut);
-		Log.e("DEBUG", "targetZoom: " + zoom);
-		Log.e("DEBUG", "x: " + x);
-		Log.e("DEBUG", "y: " + y);
-
 	}
 
 	/**
@@ -497,7 +501,7 @@ public class TouchImageView extends ImageView {
 	 * 
 	 */
 	private class GestureListener extends
-			GestureDetector.SimpleOnGestureListener {
+	GestureDetector.SimpleOnGestureListener {
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
@@ -536,10 +540,6 @@ public class TouchImageView extends ImageView {
 						targetZoom, e.getX(), e.getY(), false);
 				compatPostOnAnimation(doubleTap);
 				consumed = true;
-
-				Log.e("DEBUG", "targetZoom: " + targetZoom);
-				Log.e("DEBUG", "x: " + e.getX());
-				Log.e("DEBUG", "y: " + e.getY());
 			}
 			return consumed;
 		}
@@ -611,7 +611,7 @@ public class TouchImageView extends ImageView {
 	 * 
 	 */
 	private class ScaleListener extends
-			ScaleGestureDetector.SimpleOnScaleGestureListener {
+	ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
 			setState(ZOOM);
@@ -710,6 +710,7 @@ public class TouchImageView extends ImageView {
 			//
 			startTouch = transformCoordBitmapToTouch(bitmapX, bitmapY);
 			endTouch = new PointF(viewWidth / 2, viewHeight / 2);
+
 		}
 
 		@Override
@@ -803,11 +804,14 @@ public class TouchImageView extends ImageView {
 	 */
 	private PointF transformCoordTouchToBitmap(float x, float y,
 			boolean clipToBitmap) {
+
+
 		matrix.getValues(m);
 		float origW = getDrawable().getIntrinsicWidth();
 		float origH = getDrawable().getIntrinsicHeight();
 		float transX = m[Matrix.MTRANS_X];
 		float transY = m[Matrix.MTRANS_Y];
+
 		float finalX = ((x - transX) * origW) / getImageWidth();
 		float finalY = ((y - transY) * origH) / getImageHeight();
 

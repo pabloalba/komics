@@ -3,8 +3,10 @@ package net.kaleidos.comicsmagic;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 
 import net.kaleidos.comicsmagic.adapter.FullScreenImageAdapter;
+import net.kaleidos.comicsmagic.components.ImageViewPager;
 import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -15,15 +17,14 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.v4.view.ViewPager;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
-import android.view.Window;
 import android.widget.Button;
 import android.widget.NumberPicker;
 
@@ -31,11 +32,10 @@ public class FullScreenViewActivity extends Activity {
 
 	private Utils utils;
 	private FullScreenImageAdapter adapter;
-	private ViewPager viewPager;
+	private ImageViewPager viewPager;
 	SharedPreferences preferences;
 	SharedPreferences.Editor editPreferences;
 	float quarterX;
-	float topQuarter;
 	OnTouchListener touchListener;
 
 	int fitStyle = AppConstant.FIT_WIDTH;
@@ -44,6 +44,7 @@ public class FullScreenViewActivity extends Activity {
 	String pageNumberName;
 	ArrayList<Scene> scenes = new ArrayList<Scene>();
 	int currentScene = 0;
+	boolean goForward = true;
 
 	private final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
@@ -54,7 +55,7 @@ public class FullScreenViewActivity extends Activity {
 		setFullScreen(true);
 
 		setContentView(R.layout.activity_fullscreen_view);
-		viewPager = (ViewPager) findViewById(R.id.pager);
+		viewPager = (ImageViewPager) findViewById(R.id.pager);
 
 		utils = new Utils(getApplicationContext());
 
@@ -72,9 +73,8 @@ public class FullScreenViewActivity extends Activity {
 		regenerateAdapterPage(number);
 		Point size = utils.getScreenSize();
 		quarterX = size.x / 4;
-		topQuarter = size.y / 4;
 
-		recalculateScenes();
+		checkMagicMode();
 
 		getActionBar().setTitle(
 				getResources().getString(R.string.app_name) + " ("
@@ -92,16 +92,43 @@ public class FullScreenViewActivity extends Activity {
 
 			@Override
 			public void onPageSelected(int position) {
-				// Check if this is the page you want.
 				editPreferences.putInt(pageNumberName, position);
 				editPreferences.commit();
 				getActionBar().setTitle(
 						getResources().getString(R.string.app_name) + " ("
 								+ (viewPager.getCurrentItem() + 1) + " / "
 								+ fileNames.size() + ")");
+
+
+
+				if (fitStyle == AppConstant.FIT_MAGIC){
+					recalculateScenes();
+					if (goForward){
+						currentScene = 0;
+					} else {
+						currentScene = scenes.size()-1;
+					}
+					Log.e("DEBUG", "onPageScrollStateChanged "+currentScene);
+					moveToCurrentScene();
+
+				}
+
+
+
 			}
 		});
 
+	}
+
+	private void checkMagicMode(){
+		if (fitStyle == AppConstant.FIT_MAGIC) {
+			viewPager.setAvoidScroll(true);
+			recalculateScenes();
+			currentScene = 0;
+			moveToCurrentScene();
+		} else {
+			viewPager.setAvoidScroll(false);
+		}
 	}
 
 	private OnTouchListener getTouchListener() {
@@ -115,41 +142,33 @@ public class FullScreenViewActivity extends Activity {
 						return true;
 					}
 
-					// Show the action bar when taping the top of the image
-					if (e.getY() < topQuarter) {
-						setFullScreen(false);
-						return true;
-					} else {
-						if (fitStyle != AppConstant.FIT_MAGIC) {
-							// Pass page on tap on the left/right borders of the
-							// screen
-							int number = viewPager.getCurrentItem();
-							if ((e.getX() < quarterX) && (number > 0)) {
-								viewPager.setCurrentItem(number - 1, true);
-							}
-							if ((e.getX() > quarterX * 3)
-									&& (number < fileNames.size() - 1)) {
-								viewPager.setCurrentItem(number + 1, true);
-							}
-						} else {
-							// Magic mode! Pass scene on tap on the left/right
-							// borders of the
-							// screen
-							if ((e.getX() < quarterX) && (currentScene > 0)) {
-								currentScene--;
-								magic(scenes.get(currentScene).getX(), scenes
-										.get(currentScene).getY(),
-										scenes.get(currentScene).getZoom());
+					int number = viewPager.getCurrentItem();
 
-							}
-							if ((e.getX() > quarterX * 3)
-									&& (currentScene < scenes.size() - 1)) {
-								currentScene++;
-								magic(scenes.get(currentScene).getX(), scenes
-										.get(currentScene).getY(),
-										scenes.get(currentScene).getZoom());
-							}
+					if (e.getX() < quarterX) {
+						if ((fitStyle == AppConstant.FIT_MAGIC) && (currentScene > 0)){
+							currentScene--;
+							moveToCurrentScene();
+							return true;
 						}
+
+						if (number > 0) {
+							goForward = false;
+							viewPager.setCurrentItem(number - 1, true);
+						}
+
+					} else if (e.getX() > quarterX * 3) {
+						if ((fitStyle == AppConstant.FIT_MAGIC) && (currentScene < scenes.size() - 1)){
+							currentScene++;
+							moveToCurrentScene();
+							return true;
+						}
+
+						if (number < fileNames.size() - 1) {
+							goForward = true;
+							viewPager.setCurrentItem(number + 1, true);
+						}
+					} else {
+						setFullScreen(false);
 					}
 					return true;
 				}
@@ -157,6 +176,7 @@ public class FullScreenViewActivity extends Activity {
 		}
 		return touchListener;
 	}
+
 
 	private void regenerateAdapterPage(int number) {
 		adapter = new FullScreenImageAdapter(FullScreenViewActivity.this,
@@ -187,19 +207,28 @@ public class FullScreenViewActivity extends Activity {
 			if (menuFitStyle != -1) {
 				fitStyle = menuFitStyle;
 				regenerateAdapterPage(viewPager.getCurrentItem());
-				if (fitStyle == AppConstant.FIT_MAGIC) {
-					recalculateScenes();
-					currentScene = 0;
-					/*
-					 * getTouchImageView().zoomToPoint(
-					 * scenes.get(currentScene).getX(),
-					 * scenes.get(currentScene).getY(),
-					 * scenes.get(currentScene).getZoom());
-					 */
-				}
+				checkMagicMode();
 			}
 		}
 		return true;
+	}
+
+	private void moveToCurrentScene(){
+		if ((getTouchImageView()!=null) && (getTouchImageView().getMatchViewWidth() > 0)){
+			Log.e("DEBUG", "moveToCurrentScene ok " + getTouchImageView().getMatchViewWidth());
+			getTouchImageView().zoomToPoint(
+					scenes.get(currentScene).getX(),
+					scenes.get(currentScene).getY(),
+					scenes.get(currentScene).getZoom());
+		} else {
+			Log.e("DEBUG", "moveToCurrentScene delay");
+			scheduler.schedule(new Runnable() {
+				@Override
+				public void run() {
+					moveToCurrentScene();
+				}
+			}, 1000, TimeUnit.MILLISECONDS);
+		}
 	}
 
 	@Override
@@ -218,12 +247,9 @@ public class FullScreenViewActivity extends Activity {
 			return;
 		}
 
-		Window window = getWindow();
 		if (full) {
-			// window.addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getActionBar().hide();
 		} else {
-			// window.clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
 			getActionBar().show();
 		}
 	}
@@ -259,10 +285,12 @@ public class FullScreenViewActivity extends Activity {
 	private void recalculateScenes() {
 		// Sample points
 		scenes.clear();
-		scenes.add(new Scene(100, 400, 5));
-		scenes.add(new Scene(300, 400, 4));
-		scenes.add(new Scene(500, 400, 5));
-		scenes.add(new Scene(100, 500, 2));
+
+		scenes.add(new Scene(522, 210, 4));
+		scenes.add(new Scene(522, 634, 4));
+		scenes.add(new Scene(522, 1015, 4));
+		scenes.add(new Scene(282, 1467, 5));
+		scenes.add(new Scene(828, 1467, 4));
 
 	}
 
@@ -270,9 +298,5 @@ public class FullScreenViewActivity extends Activity {
 		return (TouchImageView) viewPager.findViewWithTag("imgDisplay"
 				+ viewPager.getCurrentItem());
 
-	}
-
-	private void magic(final float x, final float y, final float zoom) {
-		getTouchImageView().zoomToPoint(x, y, zoom);
 	}
 }
