@@ -288,7 +288,7 @@ public class FullScreenViewActivity extends Activity {
 
 		scenes.add(new Scene(522, 210, 4));
 		scenes.add(new Scene(522, 634, 4));
-		scenes.add(new Scene(522, 1015, 4));
+		scenes.add(new Scene(522, 1015, 8));
 		scenes.add(new Scene(282, 1467, 5));
 		scenes.add(new Scene(828, 1467, 4));
 
