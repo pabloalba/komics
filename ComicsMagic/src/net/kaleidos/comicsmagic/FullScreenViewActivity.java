@@ -1,5 +1,6 @@
 package net.kaleidos.comicsmagic;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -8,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import net.kaleidos.comicsmagic.adapter.FullScreenImageAdapter;
 import net.kaleidos.comicsmagic.components.ImageViewPager;
 import net.kaleidos.comicsmagic.components.TouchImageView;
+import net.kaleidos.comicsmagic.edgedetector.EdgeDetector;
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
 import net.kaleidos.comicsmagic.scenes.Scene;
@@ -16,6 +18,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
@@ -104,15 +107,7 @@ public class FullScreenViewActivity extends Activity {
 
 
 				if (fitStyle == AppConstant.FIT_MAGIC){
-					recalculateScenes();
-					if (goForward){
-						currentScene = 0;
-					} else {
-						currentScene = scenes.size()-1;
-					}
-					Log.e("DEBUG", "onPageScrollStateChanged "+currentScene);
-					moveToCurrentScene();
-
+					checkMagicMode();
 				}
 
 
@@ -124,10 +119,19 @@ public class FullScreenViewActivity extends Activity {
 
 	private void checkMagicMode(){
 		if (fitStyle == AppConstant.FIT_MAGIC) {
-			viewPager.setAvoidScroll(true);
-			recalculateScenes();
-			currentScene = 0;
-			moveToCurrentScene();
+			if ((getTouchImageView()!=null) && (getTouchImageView().getMatchViewWidth() > 0)){
+				viewPager.setAvoidScroll(true);
+				recalculateScenes();
+				currentScene = 0;
+				moveToCurrentScene();
+			} else {
+				scheduler.schedule(new Runnable() {
+					@Override
+					public void run() {
+						checkMagicMode();
+					}
+				}, 1000, TimeUnit.MILLISECONDS);
+			}
 		} else {
 			viewPager.setAvoidScroll(false);
 		}
@@ -217,13 +221,11 @@ public class FullScreenViewActivity extends Activity {
 
 	private void moveToCurrentScene(){
 		if ((getTouchImageView()!=null) && (getTouchImageView().getMatchViewWidth() > 0)){
-			Log.e("DEBUG", "moveToCurrentScene ok " + getTouchImageView().getMatchViewWidth());
 			getTouchImageView().zoomToPoint(
 					scenes.get(currentScene).getX(),
 					scenes.get(currentScene).getY(),
 					scenes.get(currentScene).getZoom());
 		} else {
-			Log.e("DEBUG", "moveToCurrentScene delay");
 			scheduler.schedule(new Runnable() {
 				@Override
 				public void run() {
@@ -287,12 +289,25 @@ public class FullScreenViewActivity extends Activity {
 	private void recalculateScenes() {
 		// Sample points
 		scenes.clear();
+		Drawable drawable = getTouchImageView().getDrawable();
 
+		try {
+			Log.e("DEBUG","Start");
+			scenes = EdgeDetector.processImage(drawable);
+			Log.e("DEBUG","End " + scenes.size());
+		} catch (IOException e) {
+			//Only one big scene
+
+		}
+
+
+		/*
 		scenes.add(new Scene(522, 210, 4));
 		scenes.add(new Scene(522, 634, 4));
 		scenes.add(new Scene(522, 1015, 8));
 		scenes.add(new Scene(282, 1467, 5));
 		scenes.add(new Scene(828, 1467, 4));
+		 */
 
 	}
 
