@@ -24,7 +24,7 @@ public class ImageViewPager extends ViewPager {
 	@Override
 	protected boolean canScroll(View v, boolean checkV, int dx, int x, int y) {
 		if (avoidScroll){
-			return false;
+			return true;
 		}
 		if (v instanceof TouchImageView) {
 			TouchImageView imageView = (TouchImageView) v;

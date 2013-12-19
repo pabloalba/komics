@@ -122,7 +122,11 @@ public class FullScreenViewActivity extends Activity {
 			if ((getTouchImageView()!=null) && (getTouchImageView().getMatchViewWidth() > 0)){
 				viewPager.setAvoidScroll(true);
 				recalculateScenes();
-				currentScene = 0;
+				if (goForward){
+					currentScene = 0;
+				} else {
+					currentScene = scenes.size()-1;
+				}
 				moveToCurrentScene();
 			} else {
 				scheduler.schedule(new Runnable() {
@@ -130,7 +134,7 @@ public class FullScreenViewActivity extends Activity {
 					public void run() {
 						checkMagicMode();
 					}
-				}, 1000, TimeUnit.MILLISECONDS);
+				}, 2000, TimeUnit.MILLISECONDS);
 			}
 		} else {
 			viewPager.setAvoidScroll(false);
@@ -231,7 +235,7 @@ public class FullScreenViewActivity extends Activity {
 				public void run() {
 					moveToCurrentScene();
 				}
-			}, 1000, TimeUnit.MILLISECONDS);
+			}, 2000, TimeUnit.MILLISECONDS);
 		}
 	}
 
@@ -297,17 +301,8 @@ public class FullScreenViewActivity extends Activity {
 			Log.e("DEBUG","End " + scenes.size());
 		} catch (IOException e) {
 			//Only one big scene
-
+			scenes.add(new Scene(getTouchImageView().getMatchViewWidth()/2, getTouchImageView().getMatchViewHeight()/2, 1));
 		}
-
-
-		/*
-		scenes.add(new Scene(522, 210, 4));
-		scenes.add(new Scene(522, 634, 4));
-		scenes.add(new Scene(522, 1015, 8));
-		scenes.add(new Scene(282, 1467, 5));
-		scenes.add(new Scene(828, 1467, 4));
-		 */
 
 	}
 
@@ -318,69 +313,69 @@ public class FullScreenViewActivity extends Activity {
 	}
 
 
-    /********************************************************
-     * Sound buttons stuff
-     ********************************************************/
+	/********************************************************
+	 * Sound buttons stuff
+	 ********************************************************/
 
-    public void changeScreenBrightness(float brightnessModifier){
-        WindowManager.LayoutParams layout = getWindow().getAttributes();
-        layout.screenBrightness += brightnessModifier;
-        layout.screenBrightness = Math.max(layout.screenBrightness , 0F);
-        layout.screenBrightness = Math.min(layout.screenBrightness , 1F);
+	public void changeScreenBrightness(float brightnessModifier){
+		WindowManager.LayoutParams layout = getWindow().getAttributes();
+		layout.screenBrightness += brightnessModifier;
+		layout.screenBrightness = Math.max(layout.screenBrightness , 0F);
+		layout.screenBrightness = Math.min(layout.screenBrightness , 1F);
 
-        getWindow().setAttributes(layout);
-    }
+		getWindow().setAttributes(layout);
+	}
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
-            event.startTracking();
-            changeScreenBrightness(0.1F);
-            return true;
-        }
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+			event.startTracking();
+			changeScreenBrightness(0.1F);
+			return true;
+		}
 
-        if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-            event.startTracking();
-            changeScreenBrightness(-0.1F);
-            return true;
-        }
-        return super.onKeyDown(keyCode, event);
-    }
+		if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+			event.startTracking();
+			changeScreenBrightness(-0.1F);
+			return true;
+		}
+		return super.onKeyDown(keyCode, event);
+	}
 
-    @Override
-    public boolean onKeyLongPress(int keyCode, KeyEvent event)
-    {
-        if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
-            event.startTracking();
-            changeScreenBrightness(0.1F);
-            return true;
-        }
+	@Override
+	public boolean onKeyLongPress(int keyCode, KeyEvent event)
+	{
+		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+			event.startTracking();
+			changeScreenBrightness(0.1F);
+			return true;
+		}
 
-        if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-            event.startTracking();
-            changeScreenBrightness(-0.1F);
-            return true;
-        }
-        return super.onKeyLongPress(keyCode, event);
-    }
+		if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+			event.startTracking();
+			changeScreenBrightness(-0.1F);
+			return true;
+		}
+		return super.onKeyLongPress(keyCode, event);
+	}
 
-    @Override
-    public boolean onKeyUp(int keyCode, KeyEvent event)
-    {
-        if((event.getFlags() & KeyEvent.FLAG_CANCELED_LONG_PRESS) == 0){
-            if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
-                event.startTracking();
-                changeScreenBrightness(0.1F);
-                return true;
-            }
+	@Override
+	public boolean onKeyUp(int keyCode, KeyEvent event)
+	{
+		if((event.getFlags() & KeyEvent.FLAG_CANCELED_LONG_PRESS) == 0){
+			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+				event.startTracking();
+				changeScreenBrightness(0.1F);
+				return true;
+			}
 
-            if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
-                event.startTracking();
-                changeScreenBrightness(-0.1F);
-                return true;
-            }
-        }
-        return super.onKeyUp(keyCode, event);
-    }
+			if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+				event.startTracking();
+				changeScreenBrightness(-0.1F);
+				return true;
+			}
+		}
+		return super.onKeyUp(keyCode, event);
+	}
 
 }

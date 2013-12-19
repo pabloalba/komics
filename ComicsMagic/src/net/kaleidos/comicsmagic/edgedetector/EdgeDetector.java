@@ -8,7 +8,6 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.util.Log;
 
 
 public class EdgeDetector {
@@ -124,12 +123,19 @@ public class EdgeDetector {
 
 				int x = (x1+x2) /2;
 				int y = (y1+y2) /2;
-				scenes.add(new Scene(x, y, 4));
+
+				float deltaX = (x2 - x1);
+				float deltaY = (y2 - y1);
+
+				float scaleX = deltaX / width;
+				float scaleY = deltaY / height;
+
+				float zoom = 1 / Math.max(scaleX, scaleY);
+				scenes.add(new Scene(x, y, zoom));
 			}
 
 		}
 
-		Log.e("DEBUG","C");
 		return scenes;
 	}
 

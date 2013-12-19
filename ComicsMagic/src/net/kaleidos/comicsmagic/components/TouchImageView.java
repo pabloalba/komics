@@ -93,6 +93,9 @@ public class TouchImageView extends ImageView {
 
 	private OnTouchListener externalTouchListener;
 
+	private int drawableWidth;
+	private int drawableHeight;
+
 	int fitStyle;
 
 	public float getMatchViewWidth() {
@@ -306,14 +309,18 @@ public class TouchImageView extends ImageView {
 			return;
 		}
 
-		int drawableWidth = drawable.getIntrinsicWidth();
-		int drawableHeight = drawable.getIntrinsicHeight();
+
+
+		drawableWidth = drawable.getIntrinsicWidth();
+		drawableHeight = drawable.getIntrinsicHeight();
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
 		int widthMode = MeasureSpec.getMode(widthMeasureSpec);
 		int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		viewWidth = setViewSize(widthMode, widthSize, drawableWidth);
 		viewHeight = setViewSize(heightMode, heightSize, drawableHeight);
+
+
 
 		//
 		// Set view dimensions
@@ -327,7 +334,8 @@ public class TouchImageView extends ImageView {
 		float scaleY = (float) viewHeight / drawableHeight;
 		float scale = Math.min(scaleX, scaleY);
 
-		if (fitStyle == AppConstant.FIT_WIDTH) {
+
+		if (fitStyle == AppConstant.FIT_WIDTH || fitStyle == AppConstant.FIT_MAGIC) {
 			scale = scaleX;
 		} else if (fitStyle == AppConstant.FIT_HEIGHT) {
 			scale = scaleY;
@@ -487,9 +495,8 @@ public class TouchImageView extends ImageView {
 		compatPostOnAnimation(zoomOut);
 	}
 
-	public void zoomToPoint(float x, float y, float zoom) {
-
-		CustomZoom zoomOut = new CustomZoom(normalizedScale, zoom, x, y, false);
+	public void zoomToPoint(float x, float y, float scale) {
+		CustomZoom zoomOut = new CustomZoom(normalizedScale, scale, x, y, false);
 		compatPostOnAnimation(zoomOut);
 	}
 
