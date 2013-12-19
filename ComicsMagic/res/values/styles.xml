@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!--
         Base application theme, dependent on API level. This theme is replaced
@@ -20,7 +20,20 @@
     <!-- Application theme. -->
     <style name="FullScreenTheme" parent="AppBaseTheme">
         <!-- All customizations that are NOT specific to a particular API-level can go here. -->
-        <item name="android:windowActionBarOverlay">true</item>        
+        <item name="android:windowActionBarOverlay">true</item>    
+        <item name="android:actionBarStyle">@style/action_bar_theme</item>
+        <item name="android:actionMenuTextColor">#fff</item>    
     </style>
+    
+    <style name="action_bar_theme" parent="@android:style/Widget.Holo.ActionBar">
+        <item name="android:background">#b3000000</item>
+        <item name="android:titleTextStyle">@style/action_bar_text_theme</item>
+    </style>
+    
+    <style name="action_bar_text_theme" parent="@android:style/TextAppearance.Holo.Widget.ActionBar.Title">
+        <item name="android:textColor">@android:color/white</item>
+    </style>
+    
+    
 
 </resources>
