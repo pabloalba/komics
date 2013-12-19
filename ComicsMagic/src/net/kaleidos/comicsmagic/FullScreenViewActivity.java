@@ -208,7 +208,6 @@ public class FullScreenViewActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
 		if (item.getItemId() == R.id.select_page) {
 			showSelectPageDialog();
 		} else {
@@ -220,6 +219,13 @@ public class FullScreenViewActivity extends Activity {
 				checkMagicMode();
 			}
 		}
+		return true;
+	}
+
+	@Override
+	public boolean onPrepareOptionsMenu(Menu menu) {
+		super.onPrepareOptionsMenu(menu);
+		Utils.markSelectedItemAsChecked(menu, preferences);
 		return true;
 	}
 
@@ -237,13 +243,6 @@ public class FullScreenViewActivity extends Activity {
 				}
 			}, 2000, TimeUnit.MILLISECONDS);
 		}
-	}
-
-	@Override
-	public boolean onPrepareOptionsMenu(Menu menu) {
-		super.onPrepareOptionsMenu(menu);
-		Utils.markSelectedItemAsChecked(menu, preferences);
-		return true;
 	}
 
 	public boolean isFullScreen() {
@@ -272,7 +271,7 @@ public class FullScreenViewActivity extends Activity {
 		final NumberPicker np = (NumberPicker) d
 				.findViewById(R.id.numberPicker1);
 		np.setMaxValue(fileNames.size());
-		np.setMinValue(0);
+		np.setMinValue(1);
 		np.setValue(viewPager.getCurrentItem() + 1);
 		np.setWrapSelectorWheel(false);
 		// Do not show keyboard
