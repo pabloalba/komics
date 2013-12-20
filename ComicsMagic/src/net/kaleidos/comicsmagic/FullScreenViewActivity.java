@@ -18,6 +18,7 @@ import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
@@ -29,6 +30,7 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnTouchListener;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.NumberPicker;
@@ -114,7 +116,39 @@ public class FullScreenViewActivity extends Activity {
 
 			}
 		});
+		if (!preferences.getBoolean("coachShowed", false)){
+			onCoachMark();
+			editPreferences.putBoolean("coachShowed", true);
+			editPreferences.commit();
+		}
 
+	}
+
+
+	public void onCoachMark(){
+
+		final Dialog dialog = new Dialog(this) {
+			@Override
+			public boolean onTouchEvent(MotionEvent event) {
+				// Tap anywhere to close dialog.
+				this.dismiss();
+				return true;
+			}
+		};
+
+		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+		dialog.getWindow().setBackgroundDrawable(new ColorDrawable(R.color.semitransparentblack));
+		dialog.setContentView(R.layout.coach_mark);
+		dialog.setCanceledOnTouchOutside(true);
+
+
+		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+		lp.copyFrom(dialog.getWindow().getAttributes());
+		lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+		lp.height = WindowManager.LayoutParams.MATCH_PARENT;
+
+		dialog.show();
+		dialog.getWindow().setAttributes(lp);
 	}
 
 	private void checkMagicMode(){
@@ -210,6 +244,8 @@ public class FullScreenViewActivity extends Activity {
 	public boolean onOptionsItemSelected(MenuItem item) {
 		if (item.getItemId() == R.id.select_page) {
 			showSelectPageDialog();
+		} else if (item.getItemId() == R.id.show_coach) {
+			onCoachMark();
 		} else {
 			int menuFitStyle = Utils.saveFitPreferenceFromMenu(item,
 					editPreferences);
