@@ -284,7 +284,8 @@ public class Utils {
 		}
 
 		final BitmapFactory.Options options = new BitmapFactory.Options();
-		options.inPurgeable = true;
+		// options.inPurgeable = true;
+		options.inSampleSize = 1;
 		options.inInputShareable = true;
 
 		return BitmapFactory.decodeByteArray(byteArr, 0, count, options);
