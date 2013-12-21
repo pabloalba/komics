@@ -2,16 +2,15 @@ package net.kaleidos.comicsmagic.helper.extractor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -74,29 +73,28 @@ public class ZipExtractor {
 	public static void decompressImagesFile(File file, File outputDir,
 			Set<String> extractFilenames, LoadImageListener loadImageListener) {
 		try {
-			FileInputStream fin = new FileInputStream(file);
-			ZipInputStream zin = new ZipInputStream(fin);
-			ZipEntry ze = null;
+			ZipFile zipFile = new ZipFile(file);
+			String path = outputDir.getAbsolutePath() + File.separator;
 
-			while (((ze = zin.getNextEntry()) != null)
-					&& (!extractFilenames.isEmpty())) {
+			for (Iterator iterator = extractFilenames.iterator(); iterator
+					.hasNext();) {
+				String fullName = (String) iterator.next();
+				String zipName = fullName.substring(path.length());
+				ZipEntry ze = zipFile.getEntry(zipName);
+
 				File outputFile = new File(outputDir.getAbsolutePath()
 						+ File.separator + ze.getName());
-				if ((!outputFile.exists())
-						&& (extractFilenames.contains(outputFile
-								.getAbsolutePath()))) {
+				if (!outputFile.exists()) {
 					Log.d("DEBUG", "Extract file: " + outputFile);
-
-					extractFilenames.remove(outputFile.getAbsolutePath());
 					FileOutputStream fout = new FileOutputStream(outputFile);
-
+					InputStream zin = zipFile.getInputStream(ze);
 					byte[] buffer = new byte[4096];
 					for (int c = zin.read(buffer); c != -1; c = zin
 							.read(buffer)) {
 						fout.write(buffer, 0, c);
 					}
 
-					zin.closeEntry();
+					zin.close();
 					fout.close();
 
 					if (loadImageListener != null) {
@@ -108,7 +106,6 @@ public class ZipExtractor {
 				}
 
 			}
-			zin.close();
 
 		} catch (Exception e) {
 			Log.e("Decompress", "unzip", e);
