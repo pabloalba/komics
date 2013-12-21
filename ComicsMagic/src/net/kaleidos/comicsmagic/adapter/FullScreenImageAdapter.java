@@ -9,8 +9,10 @@ import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
+import net.kaleidos.comicsmagic.listener.LoadImageListener;
 import android.app.Activity;
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
@@ -21,8 +23,10 @@ import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-public class FullScreenImageAdapter extends PagerAdapter {
+public class FullScreenImageAdapter extends PagerAdapter implements
+		LoadImageListener {
 
+	private static final String LOADING = "loading/loading.png";
 	private final Activity _activity;
 	private final ArrayList<String> _imagePaths;
 	private LayoutInflater inflater;
@@ -61,6 +65,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 
 	@Override
 	public Object instantiateItem(ViewGroup container, int position) {
+
 		inflater = (LayoutInflater) _activity
 				.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 		View viewLayout = inflater.inflate(R.layout.layout_fullscreen_image,
@@ -76,11 +81,23 @@ public class FullScreenImageAdapter extends PagerAdapter {
 		imgDisplay.setTag("imgDisplay" + position);
 
 		try {
-			File f = new File(_imagePaths.get(position));
-			InputStream in = new FileInputStream(f);
+
+			String fileName = _imagePaths.get(position);
+			InputStream in;
+
+			// Files not loaded has extension ".cm"
+			if (!fileName.endsWith(".cm")) {
+				File f = new File(fileName);
+				in = new FileInputStream(f);
+			} else {
+				AssetManager assetManager = _activity.getAssets();
+				in = assetManager.open(LOADING);
+			}
+
 			Bitmap bitmap = Utils.readBitmapFromStream(in);
 			in.close();
 			imgDisplay.setImageBitmap(bitmap);
+			imgDisplay.setCurrentImagePath(fileName);
 		} catch (Exception e) {
 			// Do not show image
 		}
@@ -98,5 +115,10 @@ public class FullScreenImageAdapter extends PagerAdapter {
 	public void destroyItem(ViewGroup container, int position, Object object) {
 		((ViewPager) container).removeView((LinearLayout) object);
 
+	}
+
+	@Override
+	public void onLoadImage(String fileName) {
+		Utils.replaceCMStringOnList(fileName, _imagePaths);
 	}
 }

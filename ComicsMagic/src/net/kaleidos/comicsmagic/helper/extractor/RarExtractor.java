@@ -10,6 +10,7 @@ import java.util.ArrayList;
 
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
+import net.kaleidos.comicsmagic.listener.LoadImageListener;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.util.Log;
@@ -17,17 +18,20 @@ import android.util.Log;
 import com.github.junrar.Archive;
 import com.github.junrar.rarfile.FileHeader;
 
-public class RarExtractor{
+public class RarExtractor {
 
 	public static File getFirstImageFile(File file, Context context) {
 		File outputFile = null;
 		try {
 			File outputDir = context.getCacheDir(); // temp dir
-			File thumbnailDir = new File (outputDir.getAbsolutePath() + File.separator + "thumbnail");
+			File thumbnailDir = new File(outputDir.getAbsolutePath()
+					+ File.separator + "thumbnail");
 			thumbnailDir.mkdir();
 
-			outputFile = new File(thumbnailDir + File.separator + file.getName() + ".jpg");
-			File outputFileTmp = new File(thumbnailDir + File.separator + file.getName() + ".tmp");
+			outputFile = new File(thumbnailDir + File.separator
+					+ file.getName() + ".jpg");
+			File outputFileTmp = new File(thumbnailDir + File.separator
+					+ file.getName() + ".tmp");
 			if (!outputFile.exists()) {
 
 				Archive arch = new Archive(file);
@@ -38,8 +42,12 @@ public class RarExtractor{
 					if (fh == null) {
 						break;
 					}
-					if ((fh != null)&&(!fh.isDirectory())&& (Utils.isSupportedFile(fh.getFileNameString(), AppConstant.IMAGE_EXTN))) {
-						OutputStream stream = new FileOutputStream(outputFileTmp);
+					if ((fh != null)
+							&& (!fh.isDirectory())
+							&& (Utils.isSupportedFile(fh.getFileNameString(),
+									AppConstant.IMAGE_EXTN))) {
+						OutputStream stream = new FileOutputStream(
+								outputFileTmp);
 						arch.extractFile(fh, stream);
 						stream.close();
 
@@ -48,9 +56,11 @@ public class RarExtractor{
 
 						Bitmap imageBitmap = Utils.readBitmapFromStream(in);
 
-						imageBitmap = Bitmap.createScaledBitmap(imageBitmap, 71, 100, false);
+						imageBitmap = Bitmap.createScaledBitmap(imageBitmap,
+								71, 100, false);
 						ByteArrayOutputStream baos = new ByteArrayOutputStream();
-						imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+						imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100,
+								baos);
 						fout.write(baos.toByteArray());
 						fout.close();
 						in.close();
@@ -68,8 +78,8 @@ public class RarExtractor{
 		return outputFile;
 	}
 
-	public static ArrayList<String> getAllImagesFile(File file, File outputDir) {
-		ArrayList<String> fileNames = new ArrayList<String>();
+	public static void decompressAllImagesFile(File file, File outputDir,
+			LoadImageListener loadImageListener) {
 
 		try {
 			Archive arch = new Archive(file);
@@ -80,17 +90,24 @@ public class RarExtractor{
 				if (fh == null) {
 					break;
 				}
-				if ((fh != null)&&(!fh.isDirectory())&& (Utils.isSupportedFile(fh.getFileNameString(), AppConstant.IMAGE_EXTN))) {
-					Log.d("Decompress", "DEBUG RAR "+fh.getFileNameString());
-					File outputFile = new File (outputDir.getAbsolutePath() + File.separator + fh.getFileNameString());
+				if ((fh != null)
+						&& (!fh.isDirectory())
+						&& (Utils.isSupportedFile(fh.getFileNameString(),
+								AppConstant.IMAGE_EXTN))) {
+					Log.d("Decompress", "DEBUG RAR " + fh.getFileNameString());
+					File outputFile = new File(outputDir.getAbsolutePath()
+							+ File.separator + fh.getFileNameString());
 					OutputStream stream;
 					try {
 						stream = new FileOutputStream(outputFile);
 						arch.extractFile(fh, stream);
 						stream.close();
-						fileNames.add(outputFile.getAbsolutePath());
+						loadImageListener.onLoadImage(outputFile
+								.getAbsolutePath());
 					} catch (Exception e) {
-						Log.e("Decompress", "Fail on unrar file: "+fh.getFileNameString(), e);
+						Log.e("Decompress",
+								"Fail on unrar file: " + fh.getFileNameString(),
+								e);
 						continue;
 					}
 				}
@@ -99,15 +116,33 @@ public class RarExtractor{
 		} catch (Exception e) {
 			Log.e("Decompress", "unrar", e);
 		}
-
-
-		return fileNames;
-
 	}
 
+	public static ArrayList<String> getAllImagesNamesFromFile(File file,
+			File outputDir) {
+		ArrayList<String> fileNames = new ArrayList<String>();
+		try {
+			Archive arch = new Archive(file);
+			FileHeader fh = null;
 
-
-
-
+			while (true) {
+				fh = arch.nextFileHeader();
+				if (fh == null) {
+					break;
+				}
+				if ((fh != null)
+						&& (!fh.isDirectory())
+						&& (Utils.isSupportedFile(fh.getFileNameString(),
+								AppConstant.IMAGE_EXTN))) {
+					fileNames.add(outputDir.getAbsolutePath() + File.separator
+							+ fh.getFileNameString() + ".cm");
+				}
+			}
+			arch.close();
+		} catch (Exception e) {
+			Log.e("Decompress", "unrar", e);
+		}
+		return fileNames;
+	}
 
 }

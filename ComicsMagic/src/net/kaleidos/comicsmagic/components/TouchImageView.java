@@ -76,6 +76,8 @@ public class TouchImageView extends ImageView {
 	private Context context;
 	private Fling fling;
 
+	private String currentImagePath;
+
 	//
 	// Size of view and previous view size (ie before rotation)
 	//
@@ -97,6 +99,14 @@ public class TouchImageView extends ImageView {
 	private int drawableHeight;
 
 	int fitStyle;
+
+	public String getCurrentImagePath() {
+		return currentImagePath;
+	}
+
+	public void setCurrentImagePath(String currentImagePath) {
+		this.currentImagePath = currentImagePath;
+	}
 
 	public float getMatchViewWidth() {
 		return matchViewWidth;

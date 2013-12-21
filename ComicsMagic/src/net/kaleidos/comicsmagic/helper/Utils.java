@@ -10,14 +10,17 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Locale;
 
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.helper.extractor.RarExtractor;
 import net.kaleidos.comicsmagic.helper.extractor.ZipExtractor;
+import net.kaleidos.comicsmagic.listener.LoadImageListener;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Point;
@@ -134,6 +137,45 @@ public class Utils {
 				+ "comics");
 		comicsDir.mkdir();
 
+		String md5Name = Utils.md5(file.getAbsolutePath());
+		File outputDir = new File(comicsDir.getAbsolutePath() + File.separator
+				+ md5Name);
+		if (!outputDir.exists()) {
+			if (Utils.isSupportedFile(file.getName(),
+					AppConstant.COMIC_EXTN_ZIP)) {
+				// fileNames = ZipExtractor.getAllImagesFile(file, outputDir);
+				fileNames = ZipExtractor.getAllImagesNamesFromFile(file,
+						outputDir);
+
+			} else if (Utils.isSupportedFile(file.getName(),
+					AppConstant.COMIC_EXTN_RAR)) {
+				// fileNames = RarExtractor.getAllImagesFile(file, outputDir);
+				fileNames = RarExtractor.getAllImagesNamesFromFile(file,
+						outputDir);
+			}
+
+		} else {
+			File[] files = outputDir.listFiles();
+			for (int i = 0; i < files.length; i++) {
+				fileNames.add(files[i].getAbsolutePath());
+			}
+		}
+		Collections.sort(fileNames);
+
+		return fileNames;
+	}
+
+	public ArrayList<String> decompressImagesFile(String fileName,
+			LoadImageListener loadImageListener) {
+		ArrayList<String> fileNames = new ArrayList<String>();
+
+		File file = new File(fileName);
+		File cacheDir = _context.getCacheDir(); // temp dir
+
+		File comicsDir = new File(cacheDir.getAbsolutePath() + File.separator
+				+ "comics");
+		comicsDir.mkdir();
+
 		// Delete old comics
 		Utils.deleteOldComics(comicsDir);
 
@@ -144,18 +186,17 @@ public class Utils {
 			outputDir.mkdir();
 			if (Utils.isSupportedFile(file.getName(),
 					AppConstant.COMIC_EXTN_ZIP)) {
-				fileNames = ZipExtractor.getAllImagesFile(file, outputDir);
+				ZipExtractor.decompressAllImagesFile(file, outputDir,
+						loadImageListener);
+
 			} else if (Utils.isSupportedFile(file.getName(),
 					AppConstant.COMIC_EXTN_RAR)) {
-				fileNames = RarExtractor.getAllImagesFile(file, outputDir);
+				RarExtractor.decompressAllImagesFile(file, outputDir,
+						loadImageListener);
 			}
-		} else {
-			File[] files = outputDir.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				fileNames.add(files[i].getAbsolutePath());
-			}
+
 		}
-		Collections.sort(fileNames);
+
 		return fileNames;
 	}
 
@@ -257,6 +298,21 @@ public class Utils {
 		return BitmapFactory.decodeByteArray(byteArr, 0, count, options);
 	}
 
+	public static Bitmap readBitmapFromAsset(Context context, String strName) {
+		AssetManager assetManager = context.getAssets();
+
+		InputStream istr;
+		Bitmap bitmap = null;
+		try {
+			istr = assetManager.open(strName);
+			bitmap = BitmapFactory.decodeStream(istr);
+		} catch (IOException e) {
+			return null;
+		}
+
+		return bitmap;
+	}
+
 	public static void markSelectedItemAsChecked(Menu menu,
 			SharedPreferences preferences) {
 		int fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
@@ -306,6 +362,18 @@ public class Utils {
 		editPreferences.putInt("fitStyle", fitStyle);
 		editPreferences.commit();
 		return fitStyle;
+	}
+
+	public static void replaceCMStringOnList(String name, ArrayList<String> list) {
+		ListIterator<String> listIterator = list.listIterator();
+		while (listIterator.hasNext()) {
+			String actualName = listIterator.next();
+			if (actualName.equals(name + ".cm")) {
+				listIterator.set(name);
+				break;
+			}
+		}
+
 	}
 
 }

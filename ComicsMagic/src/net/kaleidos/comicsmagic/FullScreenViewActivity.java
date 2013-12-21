@@ -12,6 +12,7 @@ import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.edgedetector.EdgeDetector;
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
+import net.kaleidos.comicsmagic.listener.LoadImageListener;
 import net.kaleidos.comicsmagic.scenes.Scene;
 import android.app.Activity;
 import android.app.Dialog;
@@ -20,9 +21,10 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
-import android.util.Log;
 import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -36,7 +38,8 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.NumberPicker;
 
-public class FullScreenViewActivity extends Activity {
+public class FullScreenViewActivity extends Activity implements
+		LoadImageListener {
 
 	private Utils utils;
 	private FullScreenImageAdapter adapter;
@@ -45,6 +48,7 @@ public class FullScreenViewActivity extends Activity {
 	SharedPreferences.Editor editPreferences;
 	float quarterX;
 	OnTouchListener touchListener;
+	String currentComic;
 
 	int fitStyle = AppConstant.FIT_WIDTH;
 	ArrayList<String> fileNames;
@@ -53,6 +57,15 @@ public class FullScreenViewActivity extends Activity {
 	ArrayList<Scene> scenes = new ArrayList<Scene>();
 	int currentScene = 0;
 	boolean goForward = true;
+
+	final Handler mHandler = new Handler();
+	// Create runnable for posting
+	final Runnable regenerateAdapterPageRunnable = new Runnable() {
+		@Override
+		public void run() {
+			regenerateAdapterPage(viewPager.getCurrentItem());
+		}
+	};
 
 	private final ScheduledExecutorService scheduler = Executors
 			.newScheduledThreadPool(1);
@@ -72,12 +85,12 @@ public class FullScreenViewActivity extends Activity {
 		editPreferences = preferences.edit();
 
 		fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
-		String fileName = intent.getStringExtra("fileName");
+		currentComic = intent.getStringExtra("fileName");
 		String md5Name = intent.getStringExtra("md5Name");
 		pageNumberName = "pageNumber_" + md5Name;
 		int number = preferences.getInt(pageNumberName, 0);
 
-		fileNames = utils.getAllImagesFile(fileName);
+		fileNames = utils.getAllImagesFile(currentComic);
 		regenerateAdapterPage(number);
 		Point size = utils.getScreenSize();
 		quarterX = size.x / 4;
@@ -117,6 +130,12 @@ public class FullScreenViewActivity extends Activity {
 			onCoachMark();
 			editPreferences.putBoolean("coachShowed", true);
 			editPreferences.commit();
+		}
+
+		if (fileNames.size() > 0) {
+			if (fileNames.get(0).endsWith(".cm")) {
+				new UncompressComic().execute();
+			}
 		}
 
 	}
@@ -240,7 +259,6 @@ public class FullScreenViewActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		setFullScreen(true);
 		if (item.getItemId() == R.id.select_page) {
 			showSelectPageDialog();
 		} else if (item.getItemId() == R.id.show_coach) {
@@ -249,6 +267,7 @@ public class FullScreenViewActivity extends Activity {
 			int menuFitStyle = Utils.saveFitPreferenceFromMenu(item,
 					editPreferences);
 			if (menuFitStyle != -1) {
+				setFullScreen(true);
 				fitStyle = menuFitStyle;
 				regenerateAdapterPage(viewPager.getCurrentItem());
 				checkMagicMode();
@@ -330,14 +349,12 @@ public class FullScreenViewActivity extends Activity {
 		Drawable drawable = getTouchImageView().getDrawable();
 
 		try {
-			Log.e("DEBUG", "Start");
 			Display display = getWindowManager().getDefaultDisplay();
 			Point size = new Point();
 			display.getSize(size);
 			int width = size.x;
 			int height = size.y;
 			scenes = EdgeDetector.processImage(drawable, width, height);
-			Log.e("DEBUG", "End " + scenes.size());
 		} catch (IOException e) {
 			// Only one big scene
 			scenes.add(new Scene(getTouchImageView().getMatchViewWidth() / 2,
@@ -413,6 +430,28 @@ public class FullScreenViewActivity extends Activity {
 			}
 		}
 		return super.onKeyUp(keyCode, event);
+	}
+
+	private class UncompressComic extends AsyncTask<Object, Object, Object> {
+		@Override
+		protected Object doInBackground(Object... params) {
+			utils.decompressImagesFile(currentComic,
+					FullScreenViewActivity.this);
+			return null;
+		}
+
+	}
+
+	@Override
+	public void onLoadImage(String fileName) {
+		Utils.replaceCMStringOnList(fileName, fileNames);
+		if (getTouchImageView().getCurrentImagePath().equals(fileName + ".cm")) {
+			// Reload current image by regenerating adapter
+			mHandler.post(regenerateAdapterPageRunnable);
+		} else {
+			adapter.onLoadImage(fileName);
+		}
+
 	}
 
 }
