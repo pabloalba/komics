@@ -86,7 +86,7 @@ public class TouchImageView extends ImageView {
 	// rotation.
 	//
 	private float matchViewWidth, matchViewHeight, prevMatchViewWidth,
-	prevMatchViewHeight;
+			prevMatchViewHeight;
 
 	private ScaleGestureDetector mScaleDetector;
 	private GestureDetector mGestureDetector;
@@ -309,8 +309,6 @@ public class TouchImageView extends ImageView {
 			return;
 		}
 
-
-
 		drawableWidth = drawable.getIntrinsicWidth();
 		drawableHeight = drawable.getIntrinsicHeight();
 		int widthSize = MeasureSpec.getSize(widthMeasureSpec);
@@ -319,8 +317,6 @@ public class TouchImageView extends ImageView {
 		int heightMode = MeasureSpec.getMode(heightMeasureSpec);
 		viewWidth = setViewSize(widthMode, widthSize, drawableWidth);
 		viewHeight = setViewSize(heightMode, heightSize, drawableHeight);
-
-
 
 		//
 		// Set view dimensions
@@ -334,10 +330,10 @@ public class TouchImageView extends ImageView {
 		float scaleY = (float) viewHeight / drawableHeight;
 		float scale = Math.min(scaleX, scaleY);
 
-
-		if (fitStyle == AppConstant.FIT_WIDTH || fitStyle == AppConstant.FIT_MAGIC) {
+		if (fitStyle == AppConstant.FIT_WIDTH) {
 			scale = scaleX;
-		} else if (fitStyle == AppConstant.FIT_HEIGHT) {
+		} else if (fitStyle == AppConstant.FIT_HEIGHT
+				|| fitStyle == AppConstant.FIT_MAGIC) {
 			scale = scaleY;
 		} else if (fitStyle == AppConstant.FIT_IMAGE) {
 			scale = Math.min(scaleX, scaleY);
@@ -508,7 +504,7 @@ public class TouchImageView extends ImageView {
 	 * 
 	 */
 	private class GestureListener extends
-	GestureDetector.SimpleOnGestureListener {
+			GestureDetector.SimpleOnGestureListener {
 
 		@Override
 		public boolean onSingleTapConfirmed(MotionEvent e) {
@@ -618,7 +614,7 @@ public class TouchImageView extends ImageView {
 	 * 
 	 */
 	private class ScaleListener extends
-	ScaleGestureDetector.SimpleOnScaleGestureListener {
+			ScaleGestureDetector.SimpleOnScaleGestureListener {
 		@Override
 		public boolean onScaleBegin(ScaleGestureDetector detector) {
 			setState(ZOOM);
@@ -811,7 +807,6 @@ public class TouchImageView extends ImageView {
 	 */
 	private PointF transformCoordTouchToBitmap(float x, float y,
 			boolean clipToBitmap) {
-
 
 		matrix.getValues(m);
 		float origW = getDrawable().getIntrinsicWidth();

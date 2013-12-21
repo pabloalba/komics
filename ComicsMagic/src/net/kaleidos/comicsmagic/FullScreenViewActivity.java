@@ -23,6 +23,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager.OnPageChangeListener;
 import android.util.Log;
+import android.view.Display;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -106,17 +107,13 @@ public class FullScreenViewActivity extends Activity {
 								+ (viewPager.getCurrentItem() + 1) + " / "
 								+ fileNames.size() + ")");
 
-
-
-				if (fitStyle == AppConstant.FIT_MAGIC){
+				if (fitStyle == AppConstant.FIT_MAGIC) {
 					checkMagicMode();
 				}
 
-
-
 			}
 		});
-		if (!preferences.getBoolean("coachShowed", false)){
+		if (!preferences.getBoolean("coachShowed", false)) {
 			onCoachMark();
 			editPreferences.putBoolean("coachShowed", true);
 			editPreferences.commit();
@@ -124,8 +121,7 @@ public class FullScreenViewActivity extends Activity {
 
 	}
 
-
-	public void onCoachMark(){
+	public void onCoachMark() {
 
 		final Dialog dialog = new Dialog(this) {
 			@Override
@@ -137,10 +133,10 @@ public class FullScreenViewActivity extends Activity {
 		};
 
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-		dialog.getWindow().setBackgroundDrawable(new ColorDrawable(R.color.semitransparentblack));
+		dialog.getWindow().setBackgroundDrawable(
+				new ColorDrawable(R.color.semitransparentblack));
 		dialog.setContentView(R.layout.coach_mark);
 		dialog.setCanceledOnTouchOutside(true);
-
 
 		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
 		lp.copyFrom(dialog.getWindow().getAttributes());
@@ -151,15 +147,16 @@ public class FullScreenViewActivity extends Activity {
 		dialog.getWindow().setAttributes(lp);
 	}
 
-	private void checkMagicMode(){
+	private void checkMagicMode() {
 		if (fitStyle == AppConstant.FIT_MAGIC) {
-			if ((getTouchImageView()!=null) && (getTouchImageView().getMatchViewWidth() > 0)){
+			if ((getTouchImageView() != null)
+					&& (getTouchImageView().getMatchViewWidth() > 0)) {
 				viewPager.setAvoidScroll(true);
 				recalculateScenes();
-				if (goForward){
+				if (goForward) {
 					currentScene = 0;
 				} else {
-					currentScene = scenes.size()-1;
+					currentScene = scenes.size() - 1;
 				}
 				moveToCurrentScene();
 			} else {
@@ -189,7 +186,8 @@ public class FullScreenViewActivity extends Activity {
 					int number = viewPager.getCurrentItem();
 
 					if (e.getX() < quarterX) {
-						if ((fitStyle == AppConstant.FIT_MAGIC) && (currentScene > 0)){
+						if ((fitStyle == AppConstant.FIT_MAGIC)
+								&& (currentScene > 0)) {
 							currentScene--;
 							moveToCurrentScene();
 							return true;
@@ -201,7 +199,8 @@ public class FullScreenViewActivity extends Activity {
 						}
 
 					} else if (e.getX() > quarterX * 3) {
-						if ((fitStyle == AppConstant.FIT_MAGIC) && (currentScene < scenes.size() - 1)){
+						if ((fitStyle == AppConstant.FIT_MAGIC)
+								&& (currentScene < scenes.size() - 1)) {
 							currentScene++;
 							moveToCurrentScene();
 							return true;
@@ -220,7 +219,6 @@ public class FullScreenViewActivity extends Activity {
 		}
 		return touchListener;
 	}
-
 
 	private void regenerateAdapterPage(int number) {
 		adapter = new FullScreenImageAdapter(FullScreenViewActivity.this,
@@ -265,10 +263,10 @@ public class FullScreenViewActivity extends Activity {
 		return true;
 	}
 
-	private void moveToCurrentScene(){
-		if ((getTouchImageView()!=null) && (getTouchImageView().getMatchViewWidth() > 0)){
-			getTouchImageView().zoomToPoint(
-					scenes.get(currentScene).getX(),
+	private void moveToCurrentScene() {
+		if ((getTouchImageView() != null)
+				&& (getTouchImageView().getMatchViewWidth() > 0)) {
+			getTouchImageView().zoomToPoint(scenes.get(currentScene).getX(),
 					scenes.get(currentScene).getY(),
 					scenes.get(currentScene).getZoom());
 		} else {
@@ -331,12 +329,18 @@ public class FullScreenViewActivity extends Activity {
 		Drawable drawable = getTouchImageView().getDrawable();
 
 		try {
-			Log.e("DEBUG","Start");
-			scenes = EdgeDetector.processImage(drawable);
-			Log.e("DEBUG","End " + scenes.size());
+			Log.e("DEBUG", "Start");
+			Display display = getWindowManager().getDefaultDisplay();
+			Point size = new Point();
+			display.getSize(size);
+			int width = size.x;
+			int height = size.y;
+			scenes = EdgeDetector.processImage(drawable, width, height);
+			Log.e("DEBUG", "End " + scenes.size());
 		} catch (IOException e) {
-			//Only one big scene
-			scenes.add(new Scene(getTouchImageView().getMatchViewWidth()/2, getTouchImageView().getMatchViewHeight()/2, 1));
+			// Only one big scene
+			scenes.add(new Scene(getTouchImageView().getMatchViewWidth() / 2,
+					getTouchImageView().getMatchViewHeight() / 2, 1));
 		}
 
 	}
@@ -347,29 +351,28 @@ public class FullScreenViewActivity extends Activity {
 
 	}
 
-
 	/********************************************************
 	 * Sound buttons stuff
 	 ********************************************************/
 
-	public void changeScreenBrightness(float brightnessModifier){
+	public void changeScreenBrightness(float brightnessModifier) {
 		WindowManager.LayoutParams layout = getWindow().getAttributes();
 		layout.screenBrightness += brightnessModifier;
-		layout.screenBrightness = Math.max(layout.screenBrightness , 0F);
-		layout.screenBrightness = Math.min(layout.screenBrightness , 1F);
+		layout.screenBrightness = Math.max(layout.screenBrightness, 0F);
+		layout.screenBrightness = Math.min(layout.screenBrightness, 1F);
 
 		getWindow().setAttributes(layout);
 	}
 
 	@Override
 	public boolean onKeyDown(int keyCode, KeyEvent event) {
-		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			event.startTracking();
 			changeScreenBrightness(0.1F);
 			return true;
 		}
 
-		if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			event.startTracking();
 			changeScreenBrightness(-0.1F);
 			return true;
@@ -378,15 +381,14 @@ public class FullScreenViewActivity extends Activity {
 	}
 
 	@Override
-	public boolean onKeyLongPress(int keyCode, KeyEvent event)
-	{
-		if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+	public boolean onKeyLongPress(int keyCode, KeyEvent event) {
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 			event.startTracking();
 			changeScreenBrightness(0.1F);
 			return true;
 		}
 
-		if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+		if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 			event.startTracking();
 			changeScreenBrightness(-0.1F);
 			return true;
@@ -395,16 +397,15 @@ public class FullScreenViewActivity extends Activity {
 	}
 
 	@Override
-	public boolean onKeyUp(int keyCode, KeyEvent event)
-	{
-		if((event.getFlags() & KeyEvent.FLAG_CANCELED_LONG_PRESS) == 0){
-			if( keyCode == KeyEvent.KEYCODE_VOLUME_UP){
+	public boolean onKeyUp(int keyCode, KeyEvent event) {
+		if ((event.getFlags() & KeyEvent.FLAG_CANCELED_LONG_PRESS) == 0) {
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
 				event.startTracking();
 				changeScreenBrightness(0.1F);
 				return true;
 			}
 
-			if( keyCode == KeyEvent.KEYCODE_VOLUME_DOWN){
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
 				event.startTracking();
 				changeScreenBrightness(-0.1F);
 				return true;
