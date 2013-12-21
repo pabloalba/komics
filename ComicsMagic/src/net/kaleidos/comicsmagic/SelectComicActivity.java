@@ -2,6 +2,7 @@ package net.kaleidos.comicsmagic;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import net.kaleidos.comicsmagic.adapter.ComicAdapter;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -83,6 +84,10 @@ public class SelectComicActivity extends Activity {
 	}
 
 	private void openComic() {
+		new LoadComic().execute();
+	}
+
+	private void comicFilesLoaded() {
 		String md5Name = Utils.md5(currentComic.getAbsolutePath());
 		int lastPage = preferences.getInt(md5Name, 0);
 
@@ -95,6 +100,39 @@ public class SelectComicActivity extends Activity {
 		i.putExtra("fileName", currentComic.getAbsolutePath());
 		i.putExtra("md5Name", md5Name);
 		this.startActivity(i);
+	}
+
+	private class LoadComic extends AsyncTask<Object, Object, Object> {
+		@Override
+		protected Object doInBackground(Object... params) {
+			// Extract only the 5 first elements
+			ArrayList<String> list = utils
+					.getAllImagesNamesFromFile(currentComic.getAbsolutePath());
+
+			HashSet<String> set = new HashSet<String>();
+			set.add(list.get(0));
+			set.add(list.get(1));
+			set.add(list.get(2));
+			set.add(list.get(3));
+			set.add(list.get(4));
+
+			utils.decompressImagesFile(currentComic.getAbsolutePath(), set,
+					null);
+			comicFilesLoaded();
+			return null;
+		}
+
+		@Override
+		protected void onPreExecute() {
+			progressDialog = ProgressDialog.show(SelectComicActivity.this, "",
+					"Loading comic", true);
+		}
+
+		@Override
+		protected void onPostExecute(Object result) {
+			progressDialog.dismiss();
+		}
+
 	}
 
 	private class LoadComics extends AsyncTask<Object, Object, Object> {

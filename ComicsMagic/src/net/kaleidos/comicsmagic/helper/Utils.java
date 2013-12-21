@@ -7,11 +7,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
+import java.util.Set;
 
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.helper.extractor.RarExtractor;
@@ -31,6 +30,8 @@ import android.view.WindowManager;
 
 public class Utils {
 	private final Context _context;
+	private String currentFile;
+	private ArrayList<String> fileNames;
 
 	// constructor
 	public Utils(Context context) {
@@ -127,8 +128,13 @@ public class Utils {
 
 	}
 
-	public ArrayList<String> getAllImagesFile(String fileName) {
-		ArrayList<String> fileNames = new ArrayList<String>();
+	public ArrayList<String> getAllImagesNamesFromFile(String fileName) {
+		if (currentFile == fileName) {
+			return fileNames;
+		}
+
+		currentFile = fileName;
+		fileNames = new ArrayList<String>();
 
 		File file = new File(fileName);
 		File cacheDir = _context.getCacheDir(); // temp dir
@@ -140,33 +146,22 @@ public class Utils {
 		String md5Name = Utils.md5(file.getAbsolutePath());
 		File outputDir = new File(comicsDir.getAbsolutePath() + File.separator
 				+ md5Name);
-		if (!outputDir.exists()) {
-			if (Utils.isSupportedFile(file.getName(),
-					AppConstant.COMIC_EXTN_ZIP)) {
-				// fileNames = ZipExtractor.getAllImagesFile(file, outputDir);
-				fileNames = ZipExtractor.getAllImagesNamesFromFile(file,
-						outputDir);
 
-			} else if (Utils.isSupportedFile(file.getName(),
-					AppConstant.COMIC_EXTN_RAR)) {
-				// fileNames = RarExtractor.getAllImagesFile(file, outputDir);
-				fileNames = RarExtractor.getAllImagesNamesFromFile(file,
-						outputDir);
-			}
+		if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)) {
+			// fileNames = ZipExtractor.getAllImagesFile(file, outputDir);
+			fileNames = ZipExtractor.getAllImagesNamesFromFile(file, outputDir);
 
-		} else {
-			File[] files = outputDir.listFiles();
-			for (int i = 0; i < files.length; i++) {
-				fileNames.add(files[i].getAbsolutePath());
-			}
+		} else if (Utils.isSupportedFile(file.getName(),
+				AppConstant.COMIC_EXTN_RAR)) {
+			// fileNames = RarExtractor.getAllImagesFile(file, outputDir);
+			fileNames = RarExtractor.getAllImagesNamesFromFile(file, outputDir);
 		}
-		Collections.sort(fileNames);
 
 		return fileNames;
 	}
 
 	public ArrayList<String> decompressImagesFile(String fileName,
-			LoadImageListener loadImageListener) {
+			Set<String> extractFilenames, LoadImageListener loadImageListener) {
 		ArrayList<String> fileNames = new ArrayList<String>();
 
 		File file = new File(fileName);
@@ -182,19 +177,16 @@ public class Utils {
 		String md5Name = Utils.md5(file.getAbsolutePath());
 		File outputDir = new File(comicsDir.getAbsolutePath() + File.separator
 				+ md5Name);
-		if (!outputDir.exists()) {
-			outputDir.mkdir();
-			if (Utils.isSupportedFile(file.getName(),
-					AppConstant.COMIC_EXTN_ZIP)) {
-				ZipExtractor.decompressAllImagesFile(file, outputDir,
-						loadImageListener);
 
-			} else if (Utils.isSupportedFile(file.getName(),
-					AppConstant.COMIC_EXTN_RAR)) {
-				RarExtractor.decompressAllImagesFile(file, outputDir,
-						loadImageListener);
-			}
+		outputDir.mkdir();
+		if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)) {
+			ZipExtractor.decompressImagesFile(file, outputDir,
+					extractFilenames, loadImageListener);
 
+		} else if (Utils.isSupportedFile(file.getName(),
+				AppConstant.COMIC_EXTN_RAR)) {
+			RarExtractor.decompressImagesFile(file, outputDir,
+					extractFilenames, loadImageListener);
 		}
 
 		return fileNames;
@@ -362,18 +354,6 @@ public class Utils {
 		editPreferences.putInt("fitStyle", fitStyle);
 		editPreferences.commit();
 		return fitStyle;
-	}
-
-	public static void replaceCMStringOnList(String name, ArrayList<String> list) {
-		ListIterator<String> listIterator = list.listIterator();
-		while (listIterator.hasNext()) {
-			String actualName = listIterator.next();
-			if (actualName.equals(name + ".cm")) {
-				listIterator.set(name);
-				break;
-			}
-		}
-
 	}
 
 }

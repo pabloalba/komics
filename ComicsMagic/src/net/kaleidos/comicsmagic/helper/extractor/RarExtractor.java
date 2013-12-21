@@ -7,6 +7,8 @@ import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Set;
 
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -78,37 +80,42 @@ public class RarExtractor {
 		return outputFile;
 	}
 
-	public static void decompressAllImagesFile(File file, File outputDir,
-			LoadImageListener loadImageListener) {
+	public static void decompressImagesFile(File file, File outputDir,
+			Set<String> extractFilenames, LoadImageListener loadImageListener) {
 
 		try {
 			Archive arch = new Archive(file);
 			FileHeader fh = null;
 
-			while (true) {
+			while (!extractFilenames.isEmpty()) {
 				fh = arch.nextFileHeader();
 				if (fh == null) {
 					break;
 				}
-				if ((fh != null)
-						&& (!fh.isDirectory())
-						&& (Utils.isSupportedFile(fh.getFileNameString(),
-								AppConstant.IMAGE_EXTN))) {
+				if (fh != null) {
 					Log.d("Decompress", "DEBUG RAR " + fh.getFileNameString());
 					File outputFile = new File(outputDir.getAbsolutePath()
 							+ File.separator + fh.getFileNameString());
-					OutputStream stream;
-					try {
-						stream = new FileOutputStream(outputFile);
-						arch.extractFile(fh, stream);
-						stream.close();
-						loadImageListener.onLoadImage(outputFile
-								.getAbsolutePath());
-					} catch (Exception e) {
-						Log.e("Decompress",
-								"Fail on unrar file: " + fh.getFileNameString(),
-								e);
-						continue;
+					if ((!outputFile.exists())
+							&& (extractFilenames.contains(outputFile
+									.getAbsolutePath()))) {
+						extractFilenames.remove(outputFile.getAbsolutePath());
+						OutputStream stream;
+						try {
+							stream = new FileOutputStream(outputFile);
+							arch.extractFile(fh, stream);
+							stream.close();
+							if (loadImageListener != null) {
+								loadImageListener.onLoadImage(outputFile
+										.getAbsolutePath());
+							}
+
+						} catch (Exception e) {
+							Log.e("Decompress",
+									"Fail on unrar file: "
+											+ fh.getFileNameString(), e);
+							continue;
+						}
 					}
 				}
 			}
@@ -135,13 +142,14 @@ public class RarExtractor {
 						&& (Utils.isSupportedFile(fh.getFileNameString(),
 								AppConstant.IMAGE_EXTN))) {
 					fileNames.add(outputDir.getAbsolutePath() + File.separator
-							+ fh.getFileNameString() + ".cm");
+							+ fh.getFileNameString());
 				}
 			}
 			arch.close();
 		} catch (Exception e) {
 			Log.e("Decompress", "unrar", e);
 		}
+		Collections.sort(fileNames);
 		return fileNames;
 	}
 

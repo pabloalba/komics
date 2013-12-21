@@ -9,7 +9,6 @@ import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.components.TouchImageView;
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
-import net.kaleidos.comicsmagic.listener.LoadImageListener;
 import android.app.Activity;
 import android.content.Context;
 import android.content.res.AssetManager;
@@ -17,14 +16,14 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnTouchListener;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
-public class FullScreenImageAdapter extends PagerAdapter implements
-		LoadImageListener {
+public class FullScreenImageAdapter extends PagerAdapter {
 
 	private static final String LOADING = "loading/loading.png";
 	private final Activity _activity;
@@ -84,12 +83,13 @@ public class FullScreenImageAdapter extends PagerAdapter implements
 
 			String fileName = _imagePaths.get(position);
 			InputStream in;
+			File f = new File(fileName);
 
 			// Files not loaded has extension ".cm"
-			if (!fileName.endsWith(".cm")) {
-				File f = new File(fileName);
+			if (f.exists()) {
 				in = new FileInputStream(f);
 			} else {
+				Log.d("DEBUG", "File doesn't exist: " + fileName);
 				AssetManager assetManager = _activity.getAssets();
 				in = assetManager.open(LOADING);
 			}
@@ -117,8 +117,4 @@ public class FullScreenImageAdapter extends PagerAdapter implements
 
 	}
 
-	@Override
-	public void onLoadImage(String fileName) {
-		Utils.replaceCMStringOnList(fileName, _imagePaths);
-	}
 }

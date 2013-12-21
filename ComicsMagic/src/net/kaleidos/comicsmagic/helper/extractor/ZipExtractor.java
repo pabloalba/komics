@@ -6,7 +6,9 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
@@ -69,18 +71,23 @@ public class ZipExtractor {
 		return outputFile;
 	}
 
-	public static void decompressAllImagesFile(File file, File outputDir,
-			LoadImageListener loadImageListener) {
+	public static void decompressImagesFile(File file, File outputDir,
+			Set<String> extractFilenames, LoadImageListener loadImageListener) {
 		try {
 			FileInputStream fin = new FileInputStream(file);
 			ZipInputStream zin = new ZipInputStream(fin);
 			ZipEntry ze = null;
-			while ((ze = zin.getNextEntry()) != null) {
-				if (!ze.isDirectory()
-						&& Utils.isSupportedFile(ze.getName(),
-								AppConstant.IMAGE_EXTN)) {
-					File outputFile = new File(outputDir.getAbsolutePath()
-							+ File.separator + ze.getName());
+
+			while (((ze = zin.getNextEntry()) != null)
+					&& (!extractFilenames.isEmpty())) {
+				File outputFile = new File(outputDir.getAbsolutePath()
+						+ File.separator + ze.getName());
+				if ((!outputFile.exists())
+						&& (extractFilenames.contains(outputFile
+								.getAbsolutePath()))) {
+					Log.d("DEBUG", "Extract file: " + outputFile);
+
+					extractFilenames.remove(outputFile.getAbsolutePath());
 					FileOutputStream fout = new FileOutputStream(outputFile);
 
 					byte[] buffer = new byte[4096];
@@ -91,8 +98,15 @@ public class ZipExtractor {
 
 					zin.closeEntry();
 					fout.close();
-					loadImageListener.onLoadImage(outputFile.getAbsolutePath());
+
+					if (loadImageListener != null) {
+						loadImageListener.onLoadImage(outputFile
+								.getAbsolutePath());
+					}
+				} else {
+					Log.d("DEBUG", "Do not extract file: " + outputFile);
 				}
+
 			}
 			zin.close();
 
@@ -115,13 +129,14 @@ public class ZipExtractor {
 						&& Utils.isSupportedFile(ze.getName(),
 								AppConstant.IMAGE_EXTN)) {
 					fileNames.add(outputDir.getAbsolutePath() + File.separator
-							+ ze.getName() + ".cm");
+							+ ze.getName());
 				}
 			}
 			zipFile.close();
 		} catch (Exception e) {
 			Log.e("Decompress", "unzip", e);
 		}
+		Collections.sort(fileNames);
 		return fileNames;
 
 	}

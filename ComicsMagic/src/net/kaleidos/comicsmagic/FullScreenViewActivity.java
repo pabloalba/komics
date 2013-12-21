@@ -2,6 +2,7 @@ package net.kaleidos.comicsmagic;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -90,7 +91,7 @@ public class FullScreenViewActivity extends Activity implements
 		pageNumberName = "pageNumber_" + md5Name;
 		int number = preferences.getInt(pageNumberName, 0);
 
-		fileNames = utils.getAllImagesFile(currentComic);
+		fileNames = utils.getAllImagesNamesFromFile(currentComic);
 		regenerateAdapterPage(number);
 		Point size = utils.getScreenSize();
 		quarterX = size.x / 4;
@@ -132,11 +133,7 @@ public class FullScreenViewActivity extends Activity implements
 			editPreferences.commit();
 		}
 
-		if (fileNames.size() > 0) {
-			if (fileNames.get(0).endsWith(".cm")) {
-				new UncompressComic().execute();
-			}
-		}
+		new UncompressComic().execute();
 
 	}
 
@@ -435,23 +432,24 @@ public class FullScreenViewActivity extends Activity implements
 	private class UncompressComic extends AsyncTask<Object, Object, Object> {
 		@Override
 		protected Object doInBackground(Object... params) {
-			utils.decompressImagesFile(currentComic,
+			HashSet<String> set = new HashSet<String>();
+			for (int i = 5; i < fileNames.size(); i++) {
+				set.add(fileNames.get(i));
+			}
+
+			utils.decompressImagesFile(currentComic, set,
 					FullScreenViewActivity.this);
 			return null;
 		}
-
 	}
 
 	@Override
 	public void onLoadImage(String fileName) {
-		Utils.replaceCMStringOnList(fileName, fileNames);
-		if (getTouchImageView().getCurrentImagePath().equals(fileName + ".cm")) {
+		// If we was showing an image not uncompresed
+		if (getTouchImageView().getCurrentImagePath().equals(fileName)) {
 			// Reload current image by regenerating adapter
 			mHandler.post(regenerateAdapterPageRunnable);
-		} else {
-			adapter.onLoadImage(fileName);
 		}
-
 	}
 
 }
