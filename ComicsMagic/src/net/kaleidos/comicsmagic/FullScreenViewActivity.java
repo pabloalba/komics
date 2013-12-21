@@ -240,6 +240,7 @@ public class FullScreenViewActivity extends Activity {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
+		setFullScreen(true);
 		if (item.getItemId() == R.id.select_page) {
 			showSelectPageDialog();
 		} else if (item.getItemId() == R.id.show_coach) {
