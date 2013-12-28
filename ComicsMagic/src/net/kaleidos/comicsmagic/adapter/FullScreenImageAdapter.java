@@ -78,6 +78,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 		imgDisplay.setFitStyle(fitStyle);
 
 		imgDisplay.setTag("imgDisplay" + position);
+		imgDisplay.setCurrentImagePath("");
 
 		try {
 

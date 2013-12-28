@@ -76,6 +76,8 @@ public class ZipExtractor {
 			ZipFile zipFile = new ZipFile(file);
 			String path = outputDir.getAbsolutePath() + File.separator;
 
+			int num = 0;
+
 			for (Iterator iterator = extractFilenames.iterator(); iterator
 					.hasNext();) {
 				String fullName = (String) iterator.next();
@@ -101,6 +103,7 @@ public class ZipExtractor {
 						loadImageListener.onLoadImage(outputFile
 								.getAbsolutePath());
 					}
+
 				} else {
 					Log.d("DEBUG", "Do not extract file: " + outputFile);
 				}

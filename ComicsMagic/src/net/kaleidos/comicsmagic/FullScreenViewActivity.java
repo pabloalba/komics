@@ -75,7 +75,6 @@ public class FullScreenViewActivity extends Activity implements
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setFullScreen(true);
-
 		setContentView(R.layout.activity_fullscreen_view);
 		viewPager = (ImageViewPager) findViewById(R.id.pager);
 
@@ -363,7 +362,6 @@ public class FullScreenViewActivity extends Activity implements
 	private TouchImageView getTouchImageView() {
 		return (TouchImageView) viewPager.findViewWithTag("imgDisplay"
 				+ viewPager.getCurrentItem());
-
 	}
 
 	/********************************************************
@@ -446,7 +444,8 @@ public class FullScreenViewActivity extends Activity implements
 	@Override
 	public void onLoadImage(String fileName) {
 		// If we was showing an image not uncompresed
-		if (getTouchImageView().getCurrentImagePath().equals(fileName)) {
+		if ((getTouchImageView() != null)
+				&& (getTouchImageView().getCurrentImagePath().equals(fileName))) {
 			// Reload current image by regenerating adapter
 			mHandler.post(regenerateAdapterPageRunnable);
 		}

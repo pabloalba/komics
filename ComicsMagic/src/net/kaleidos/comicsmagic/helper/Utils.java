@@ -1,6 +1,7 @@
 package net.kaleidos.comicsmagic.helper;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.MessageDigest;
@@ -284,8 +285,8 @@ public class Utils {
 		}
 
 		final BitmapFactory.Options options = new BitmapFactory.Options();
-		// options.inPurgeable = true;
-		options.inSampleSize = 1;
+		options.inPurgeable = true;
+		// options.inSampleSize = 8;
 		options.inInputShareable = true;
 
 		return BitmapFactory.decodeByteArray(byteArr, 0, count, options);
@@ -355,6 +356,20 @@ public class Utils {
 		editPreferences.putInt("fitStyle", fitStyle);
 		editPreferences.commit();
 		return fitStyle;
+	}
+
+	public static void logToFile(String str) {
+		File f = new File(android.os.Environment.getExternalStorageDirectory()
+				.getAbsolutePath() + "/Download/log.txt");
+		try {
+			if (!f.exists()) {
+				f.createNewFile();
+			}
+			FileWriter fw = new FileWriter(f, true);
+			fw.append(str + "\n");
+			fw.close();
+		} catch (Exception e) {
+		}
 	}
 
 }
