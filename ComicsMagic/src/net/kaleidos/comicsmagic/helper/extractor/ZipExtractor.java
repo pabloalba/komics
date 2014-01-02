@@ -34,14 +34,15 @@ public class ZipExtractor {
 			if (!outputFile.exists()) {
 				ZipFile zipFile = new ZipFile(file);
 				Enumeration<? extends ZipEntry> zipEntries = zipFile.entries();
-				String firstImage = "ZZ";
+				String firstImage = "";
 				ZipEntry firstImageEntry = null;
 				while (zipEntries.hasMoreElements()) {
 					ZipEntry ze = (zipEntries.nextElement());
 					if (!ze.isDirectory()
 							&& Utils.isSupportedFile(ze.getName(),
 									AppConstant.IMAGE_EXTN)) {
-						if (firstImage.compareTo(ze.getName()) > 0) {
+						if (firstImage == ""
+								|| firstImage.compareToIgnoreCase(ze.getName()) > 0) {
 							firstImage = ze.getName();
 							firstImageEntry = ze;
 						}
