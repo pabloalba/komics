@@ -150,7 +150,11 @@ public class FullScreenViewActivity extends Activity implements
 		dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 		dialog.getWindow().setBackgroundDrawable(
 				new ColorDrawable(R.color.semitransparentblack));
-		dialog.setContentView(R.layout.coach_mark);
+		if (fitStyle == AppConstant.FIT_MAGIC) {
+			dialog.setContentView(R.layout.coach_mark_magic);
+		} else {
+			dialog.setContentView(R.layout.coach_mark);
+		}
 		dialog.setCanceledOnTouchOutside(true);
 
 		WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
@@ -166,6 +170,19 @@ public class FullScreenViewActivity extends Activity implements
 		if (fitStyle == AppConstant.FIT_MAGIC) {
 			if ((getTouchImageView() != null)
 					&& (getTouchImageView().getMatchViewWidth() > 0)) {
+
+				if (!preferences.getBoolean("coachShowedMagic", false)) {
+					FullScreenViewActivity.this.runOnUiThread(new Runnable() {
+						@Override
+						public void run() {
+							onCoachMark();
+						}
+					});
+
+					editPreferences.putBoolean("coachShowedMagic", true);
+					editPreferences.commit();
+				}
+
 				viewPager.setAvoidScroll(true);
 				recalculateScenes();
 				if (goForward) {
@@ -173,7 +190,9 @@ public class FullScreenViewActivity extends Activity implements
 				} else {
 					currentScene = scenes.size() - 1;
 				}
+
 				moveToCurrentScene();
+
 			} else {
 				scheduler.schedule(new Runnable() {
 					@Override
