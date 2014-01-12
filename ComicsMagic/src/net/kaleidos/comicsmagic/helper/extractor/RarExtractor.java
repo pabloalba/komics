@@ -93,12 +93,14 @@ public class RarExtractor {
 					break;
 				}
 				if (fh != null) {
-					Log.d("Decompress", "DEBUG RAR " + fh.getFileNameString());
+
 					File outputFile = new File(outputDir.getAbsolutePath()
 							+ File.separator + fh.getFileNameString());
 					if ((!outputFile.exists())
 							&& (extractFilenames.contains(outputFile
 									.getAbsolutePath()))) {
+						Log.d("Decompress",
+								"DEBUG RAR " + fh.getFileNameString());
 						extractFilenames.remove(outputFile.getAbsolutePath());
 						OutputStream stream;
 						try {

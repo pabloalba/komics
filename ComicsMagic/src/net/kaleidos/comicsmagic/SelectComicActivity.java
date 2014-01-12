@@ -110,6 +110,7 @@ public class SelectComicActivity extends Activity {
 					.getAllImagesNamesFromFile(currentComic.getAbsolutePath());
 
 			HashSet<String> set = new HashSet<String>();
+
 			set.add(list.get(0));
 			set.add(list.get(1));
 			set.add(list.get(2));
