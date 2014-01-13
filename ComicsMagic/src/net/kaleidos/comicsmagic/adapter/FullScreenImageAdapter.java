@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.components.TouchImageView;
@@ -11,12 +12,10 @@ import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetManager;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnTouchListener;
@@ -32,6 +31,8 @@ public class FullScreenImageAdapter extends PagerAdapter {
 	private TouchImageView imgDisplay;
 	private int fitStyle = AppConstant.FIT_WIDTH;
 	private final OnTouchListener onTouchListener;
+	String currentComic;
+	Utils utils;
 
 	public int getFitStyle() {
 		return fitStyle;
@@ -43,13 +44,15 @@ public class FullScreenImageAdapter extends PagerAdapter {
 	}
 
 	// constructor
-	public FullScreenImageAdapter(Activity activity,
+	public FullScreenImageAdapter(Activity activity, String currentComic,
 			ArrayList<String> imagePaths, int fitStyle,
 			OnTouchListener onTouchListener) {
 		this._activity = activity;
 		this._imagePaths = imagePaths;
 		this.fitStyle = fitStyle;
+		this.currentComic = currentComic;
 		this.onTouchListener = onTouchListener;
+		utils = new Utils(activity.getApplicationContext());
 	}
 
 	@Override
@@ -86,14 +89,13 @@ public class FullScreenImageAdapter extends PagerAdapter {
 			InputStream in;
 			File f = new File(fileName);
 
-			// Files not loaded has extension ".cm"
-			if (f.exists()) {
-				in = new FileInputStream(f);
-			} else {
-				Log.d("DEBUG", "File doesn't exist: " + fileName);
-				AssetManager assetManager = _activity.getAssets();
-				in = assetManager.open(LOADING);
+			if (!f.exists()) {
+				HashSet<String> set = new HashSet<String>();
+				set.add(fileName);
+				utils.decompressImagesFile(currentComic, set, null);
+				f = new File(fileName);
 			}
+			in = new FileInputStream(f);
 
 			Bitmap bitmap = Utils.readBitmapFromStream(in);
 			in.close();

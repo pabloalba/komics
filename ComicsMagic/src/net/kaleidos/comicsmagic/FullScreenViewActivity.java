@@ -2,7 +2,6 @@ package net.kaleidos.comicsmagic;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -256,7 +255,7 @@ public class FullScreenViewActivity extends Activity implements
 
 	private void regenerateAdapterPage(int number) {
 		adapter = new FullScreenImageAdapter(FullScreenViewActivity.this,
-				fileNames, fitStyle, getTouchListener());
+				currentComic, fileNames, fitStyle, getTouchListener());
 
 		viewPager.setAdapter(adapter);
 
@@ -449,13 +448,13 @@ public class FullScreenViewActivity extends Activity implements
 	private class UncompressComic extends AsyncTask<Object, Object, Object> {
 		@Override
 		protected Object doInBackground(Object... params) {
-			HashSet<String> set = new HashSet<String>();
-			for (int i = 5; i < fileNames.size(); i++) {
-				set.add(fileNames.get(i));
-			}
-
-			utils.decompressImagesFile(currentComic, set,
-					FullScreenViewActivity.this);
+			/*
+			 * HashSet<String> set = new HashSet<String>(); for (int i = 5; i <
+			 * fileNames.size(); i++) { set.add(fileNames.get(i)); }
+			 * 
+			 * utils.decompressImagesFile(currentComic, set,
+			 * FullScreenViewActivity.this);
+			 */
 			return null;
 		}
 	}

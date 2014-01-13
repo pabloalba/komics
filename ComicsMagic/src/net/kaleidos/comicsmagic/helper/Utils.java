@@ -201,7 +201,7 @@ public class Utils {
 	 */
 	public static void deleteOldComics(File comicsDir) {
 		File[] files = comicsDir.listFiles();
-		if (files.length > 3) {
+		if (files.length > 1) {
 			Arrays.sort(files, new Comparator<File>() {
 				@Override
 				public int compare(File f1, File f2) {
@@ -209,11 +209,10 @@ public class Utils {
 							f2.lastModified());
 				}
 			});
-			for (int i = 0; i < files.length - 3; i++) {
+			for (int i = 0; i < files.length - 1; i++) {
 				Utils.deleteDir(files[i]);
 			}
 		}
-
 	}
 
 	public void deleteCache() {
