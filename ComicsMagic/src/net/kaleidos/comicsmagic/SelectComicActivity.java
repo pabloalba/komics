@@ -2,7 +2,6 @@ package net.kaleidos.comicsmagic;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import net.kaleidos.comicsmagic.adapter.ComicAdapter;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -106,19 +105,18 @@ public class SelectComicActivity extends Activity {
 		@Override
 		protected Object doInBackground(Object... params) {
 			// Extract only the 5 first elements
-			ArrayList<String> list = utils
-					.getAllImagesNamesFromFile(currentComic.getAbsolutePath());
-
-			HashSet<String> set = new HashSet<String>();
-
-			set.add(list.get(0));
-			set.add(list.get(1));
-			set.add(list.get(2));
-			set.add(list.get(3));
-			set.add(list.get(4));
-
-			utils.decompressImagesFile(currentComic.getAbsolutePath(), set,
-					null);
+			/*
+			 * ArrayList<String> list = utils
+			 * .getAllImagesNamesFromFile(currentComic.getAbsolutePath());
+			 * 
+			 * HashSet<String> set = new HashSet<String>();
+			 * 
+			 * set.add(list.get(0)); set.add(list.get(1)); set.add(list.get(2));
+			 * set.add(list.get(3)); set.add(list.get(4));
+			 * 
+			 * utils.decompressImagesFile(currentComic.getAbsolutePath(), set,
+			 * null);
+			 */
 			comicFilesLoaded();
 			return null;
 		}
