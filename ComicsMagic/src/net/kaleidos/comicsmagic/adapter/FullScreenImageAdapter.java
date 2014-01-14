@@ -24,7 +24,6 @@ import android.widget.LinearLayout;
 
 public class FullScreenImageAdapter extends PagerAdapter {
 
-	private static final String LOADING = "loading/loading.png";
 	private final Activity _activity;
 	private final ArrayList<String> _imagePaths;
 	private LayoutInflater inflater;
