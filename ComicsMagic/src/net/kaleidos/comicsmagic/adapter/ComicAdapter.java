@@ -6,8 +6,10 @@ import java.util.ArrayList;
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.helper.Utils;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +20,7 @@ import android.widget.TextView;
 public class ComicAdapter extends BaseAdapter {
 	private final Context context;
 	private ArrayList<File> files;
+	private final SharedPreferences preferences;
 
 	public void setFiles(ArrayList<File> files) {
 		this.files = files;
@@ -25,10 +28,12 @@ public class ComicAdapter extends BaseAdapter {
 
 	private final Utils utils;
 
-	public ComicAdapter(Context context, ArrayList<File> files, Utils utils) {
+	public ComicAdapter(Context context, ArrayList<File> files, Utils utils,
+			SharedPreferences preferences) {
 		this.context = context;
 		this.files = files;
 		this.utils = utils;
+		this.preferences = preferences;
 	}
 
 	@Override
@@ -43,7 +48,6 @@ public class ComicAdapter extends BaseAdapter {
 			// get layout from mobile.xml
 			gridView = inflater.inflate(R.layout.comic_file, null);
 
-
 		} else {
 			gridView = convertView;
 		}
@@ -56,22 +60,29 @@ public class ComicAdapter extends BaseAdapter {
 
 		File file = files.get(position);
 
-		if (position == 0){
-			//Add a "go up" special folder
+		if (position == 0) {
+			// Add a "go up" special folder
 			textView.setText("..");
 			imageView.setImageResource(R.drawable.back);
 
 		} else {
 
 			textView.setText(file.getName());
+			String md5Name = Utils.md5(file.getAbsolutePath());
+			if (preferences.getBoolean("readed_" + md5Name, false)) {
+				textView.setTextColor(Color.GRAY);
+			} else {
+				textView.setTextColor(Color.WHITE);
+			}
 			imageView.setImageResource(R.drawable.comic);
 
-			if (file.isDirectory()){
+			if (file.isDirectory()) {
 				imageView.setImageResource(R.drawable.folder);
 			} else {
 				File f = utils.getFirstImageFile(file);
 				if (f != null) {
-					Bitmap bmImg = BitmapFactory.decodeFile(f.getAbsolutePath());
+					Bitmap bmImg = BitmapFactory
+							.decodeFile(f.getAbsolutePath());
 					imageView.setImageBitmap(bmImg);
 				} else {
 					imageView.setImageResource(R.drawable.comic);
@@ -79,12 +90,8 @@ public class ComicAdapter extends BaseAdapter {
 			}
 		}
 
-
-
-
 		return gridView;
 	}
-
 
 	@Override
 	public int getCount() {

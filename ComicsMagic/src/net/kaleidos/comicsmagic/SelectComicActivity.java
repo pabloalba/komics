@@ -166,11 +166,23 @@ public class SelectComicActivity extends Activity {
 				((ComicAdapter) gridView.getAdapter()).changeModelList(files);
 			} else {
 				gridView.setAdapter(new ComicAdapter(SelectComicActivity.this,
-						files, utils));
+						files, utils, preferences));
 			}
 			progressDialog.dismiss();
 		}
 
+	}
+
+	public void reloadFilesList() {
+		if ((gridView.getAdapter() instanceof ComicAdapter) && (files != null)) {
+			((ComicAdapter) gridView.getAdapter()).changeModelList(files);
+		}
+	}
+
+	@Override
+	public void onResume() {
+		super.onResume();
+		reloadFilesList();
 	}
 
 	@Override

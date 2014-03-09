@@ -49,6 +49,7 @@ public class FullScreenViewActivity extends Activity implements
 	float quarterX;
 	OnTouchListener touchListener;
 	String currentComic;
+	String md5Name;
 
 	int fitStyle = AppConstant.FIT_WIDTH;
 	ArrayList<String> fileNames;
@@ -85,7 +86,7 @@ public class FullScreenViewActivity extends Activity implements
 
 		fitStyle = preferences.getInt("fitStyle", AppConstant.FIT_WIDTH);
 		currentComic = intent.getStringExtra("fileName");
-		String md5Name = intent.getStringExtra("md5Name");
+		md5Name = intent.getStringExtra("md5Name");
 		pageNumberName = "pageNumber_" + md5Name;
 		int number = preferences.getInt(pageNumberName, 0);
 
@@ -114,6 +115,7 @@ public class FullScreenViewActivity extends Activity implements
 			public void onPageSelected(int position) {
 				editPreferences.putInt(pageNumberName, position);
 				editPreferences.commit();
+				checkLastPage(position);
 				getActionBar().setTitle(
 						getResources().getString(R.string.app_name) + " ("
 								+ (viewPager.getCurrentItem() + 1) + " / "
@@ -251,6 +253,13 @@ public class FullScreenViewActivity extends Activity implements
 			};
 		}
 		return touchListener;
+	}
+
+	private void checkLastPage(int number) {
+		if (number == fileNames.size() - 1) {
+			editPreferences.putBoolean("readed_" + md5Name, true);
+			editPreferences.commit();
+		}
 	}
 
 	private void regenerateAdapterPage(int number) {
