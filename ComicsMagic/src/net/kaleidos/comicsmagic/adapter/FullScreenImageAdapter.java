@@ -74,7 +74,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 		imgDisplay = (TouchImageView) viewLayout.findViewById(R.id.imgDisplay);
 		imgDisplay.setBackgroundColor(Color.BLACK);
 		// imgDisplay.setFitStyle(fitStyle);
-		imgDisplay.setMaxZoom(8f);
+		imgDisplay.setMaxZoom(6f);
 
 		imgDisplay.setExternalTouchListener(onTouchListener);
 		imgDisplay.setFitStyle(fitStyle);
