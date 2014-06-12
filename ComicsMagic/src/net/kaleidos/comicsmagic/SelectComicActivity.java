@@ -104,19 +104,6 @@ public class SelectComicActivity extends Activity {
 	private class LoadComic extends AsyncTask<Object, Object, Object> {
 		@Override
 		protected Object doInBackground(Object... params) {
-			// Extract only the 5 first elements
-			/*
-			 * ArrayList<String> list = utils
-			 * .getAllImagesNamesFromFile(currentComic.getAbsolutePath());
-			 * 
-			 * HashSet<String> set = new HashSet<String>();
-			 * 
-			 * set.add(list.get(0)); set.add(list.get(1)); set.add(list.get(2));
-			 * set.add(list.get(3)); set.add(list.get(4));
-			 * 
-			 * utils.decompressImagesFile(currentComic.getAbsolutePath(), set,
-			 * null);
-			 */
 			comicFilesLoaded();
 			return null;
 		}

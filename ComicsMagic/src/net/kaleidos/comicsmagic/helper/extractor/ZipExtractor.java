@@ -2,15 +2,15 @@ package net.kaleidos.comicsmagic.helper.extractor;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 import net.kaleidos.comicsmagic.helper.AppConstant;
 import net.kaleidos.comicsmagic.helper.Utils;
@@ -71,44 +71,37 @@ public class ZipExtractor {
 		return outputFile;
 	}
 
-	public static void decompressImagesFile(File file, File outputDir,
-			Set<String> extractFilenames, LoadImageListener loadImageListener) {
+	public static void decompressImageFile(File file, File outputDir,
+			String fileName, LoadImageListener loadImageListener) {
 		try {
 			ZipFile zipFile = new ZipFile(file);
 			String path = outputDir.getAbsolutePath() + File.separator;
 
-			int num = 0;
+			String zipName = fileName.substring(path.length());
+			ZipEntry ze = zipFile.getEntry(Utils.stringToAbsolutePath(zipName));
 
-			for (Iterator iterator = extractFilenames.iterator(); iterator
-					.hasNext();) {
-				String fullName = (String) iterator.next();
-				String zipName = fullName.substring(path.length());
-				ZipEntry ze = zipFile.getEntry(zipName);
+			File outputFile = new File(outputDir.getAbsolutePath()
+					+ File.separator
+					+ Utils.absolutePathToString((ze.getName())));
 
-				File outputFile = new File(outputDir.getAbsolutePath()
-						+ File.separator + ze.getName());
-				if (!outputFile.exists()) {
-					Log.d("DEBUG", "Extract file: " + outputFile);
-					FileOutputStream fout = new FileOutputStream(outputFile);
-					InputStream zin = zipFile.getInputStream(ze);
-					byte[] buffer = new byte[4096];
-					for (int c = zin.read(buffer); c != -1; c = zin
-							.read(buffer)) {
-						fout.write(buffer, 0, c);
-					}
-
-					zin.close();
-					fout.close();
-
-					if (loadImageListener != null) {
-						loadImageListener.onLoadImage(outputFile
-								.getAbsolutePath());
-					}
-
-				} else {
-					Log.d("DEBUG", "Do not extract file: " + outputFile);
+			if (!outputFile.exists()) {
+				Log.d("DEBUG", "Extract file: " + outputFile);
+				FileOutputStream fout = new FileOutputStream(outputFile);
+				InputStream zin = zipFile.getInputStream(ze);
+				byte[] buffer = new byte[4096];
+				for (int c = zin.read(buffer); c != -1; c = zin.read(buffer)) {
+					fout.write(buffer, 0, c);
 				}
 
+				zin.close();
+				fout.close();
+
+				if (loadImageListener != null) {
+					loadImageListener.onLoadImage(outputFile.getAbsolutePath());
+				}
+
+			} else {
+				Log.d("DEBUG", "Do not extract file: " + outputFile);
 			}
 
 		} catch (Exception e) {
@@ -121,19 +114,22 @@ public class ZipExtractor {
 			File outputDir) {
 		ArrayList<String> fileNames = new ArrayList<String>();
 		try {
-			ZipFile zipFile = new ZipFile(file);
-			Enumeration e = zipFile.entries();
+			ZipInputStream zis = new ZipInputStream(new FileInputStream(file));
+			try {
+				ZipEntry ze;
+				while ((ze = zis.getNextEntry()) != null) {
 
-			while (e.hasMoreElements()) {
-				ZipEntry ze = (ZipEntry) e.nextElement();
-				if (!ze.isDirectory()
-						&& Utils.isSupportedFile(ze.getName(),
-								AppConstant.IMAGE_EXTN)) {
-					fileNames.add(outputDir.getAbsolutePath() + File.separator
-							+ ze.getName());
+					if (!ze.isDirectory()
+							&& Utils.isSupportedFile(ze.getName(),
+									AppConstant.IMAGE_EXTN)) {
+						fileNames.add(outputDir.getAbsolutePath()
+								+ File.separator
+								+ Utils.absolutePathToString(ze.getName()));
+					}
 				}
+			} finally {
+				zis.close();
 			}
-			zipFile.close();
 		} catch (Exception e) {
 			Log.e("Decompress", "unzip", e);
 		}

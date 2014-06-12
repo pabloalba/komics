@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.HashSet;
 
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.components.TouchImageView;
@@ -89,9 +88,7 @@ public class FullScreenImageAdapter extends PagerAdapter {
 			File f = new File(fileName);
 
 			if (!f.exists()) {
-				HashSet<String> set = new HashSet<String>();
-				set.add(fileName);
-				utils.decompressImagesFile(currentComic, set, null);
+				utils.decompressImageFile(currentComic, fileName, null);
 				f = new File(fileName);
 			}
 			in = new FileInputStream(f);

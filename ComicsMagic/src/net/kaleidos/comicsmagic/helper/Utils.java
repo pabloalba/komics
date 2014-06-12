@@ -11,7 +11,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
 
 import net.kaleidos.comicsmagic.R;
 import net.kaleidos.comicsmagic.helper.extractor.RarExtractor;
@@ -161,8 +160,8 @@ public class Utils {
 		return fileNames;
 	}
 
-	public ArrayList<String> decompressImagesFile(String fileName,
-			Set<String> extractFilenames, LoadImageListener loadImageListener) {
+	public ArrayList<String> decompressImageFile(String fileName,
+			String internalName, LoadImageListener loadImageListener) {
 		ArrayList<String> fileNames = new ArrayList<String>();
 
 		File file = new File(fileName);
@@ -181,13 +180,13 @@ public class Utils {
 
 		outputDir.mkdir();
 		if (Utils.isSupportedFile(file.getName(), AppConstant.COMIC_EXTN_ZIP)) {
-			ZipExtractor.decompressImagesFile(file, outputDir,
-					extractFilenames, loadImageListener);
+			ZipExtractor.decompressImageFile(file, outputDir, internalName,
+					loadImageListener);
 
 		} else if (Utils.isSupportedFile(file.getName(),
 				AppConstant.COMIC_EXTN_RAR)) {
-			RarExtractor.decompressImagesFile(file, outputDir,
-					extractFilenames, loadImageListener);
+			RarExtractor.decompressImageFile(file, outputDir, internalName,
+					loadImageListener);
 		}
 
 		return fileNames;
@@ -369,6 +368,14 @@ public class Utils {
 			fw.close();
 		} catch (Exception e) {
 		}
+	}
+
+	public static String absolutePathToString(String absolutePath) {
+		return absolutePath.replace("/", "_____").replace("\\", "zzzzz");
+	}
+
+	public static String stringToAbsolutePath(String str) {
+		return str.replace("zzzzz", "\\").replaceAll("_____", "/");
 	}
 
 }
