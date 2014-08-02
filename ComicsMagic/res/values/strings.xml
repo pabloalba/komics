@@ -10,6 +10,8 @@
     <string name="fit_magic">Magic fit! (experimental)</string>    
     <string name="fit_style">Select fit style</string>    
     <string name="select_page">Go to page&#8230;</string>    
-    <string name="show_coach">How this works?</string>    
+    <string name="show_coach">How this works?</string>
+    <string name="show_front_pages">Show front pages</string>
+    <string name="dont_show_front_pages">Don\'t show front pages</string>    
     
 </resources>

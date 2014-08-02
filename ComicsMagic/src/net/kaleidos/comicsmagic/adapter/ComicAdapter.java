@@ -79,11 +79,15 @@ public class ComicAdapter extends BaseAdapter {
 			if (file.isDirectory()) {
 				imageView.setImageResource(R.drawable.folder);
 			} else {
-				File f = utils.getFirstImageFile(file);
-				if (f != null) {
-					Bitmap bmImg = BitmapFactory
-							.decodeFile(f.getAbsolutePath());
-					imageView.setImageBitmap(bmImg);
+				if (preferences.getBoolean("showFrontPages", true)) {
+					File f = utils.getFirstImageFile(file);
+					if (f != null) {
+						Bitmap bmImg = BitmapFactory.decodeFile(f
+								.getAbsolutePath());
+						imageView.setImageBitmap(bmImg);
+					} else {
+						imageView.setImageResource(R.drawable.comic);
+					}
 				} else {
 					imageView.setImageResource(R.drawable.comic);
 				}

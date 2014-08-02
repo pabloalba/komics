@@ -51,6 +51,7 @@ public class SelectComicActivity extends Activity {
 
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
 		editPreferences = preferences.edit();
+
 		String currentPath = preferences.getString("currentPath",
 				android.os.Environment.getExternalStorageDirectory()
 						.getAbsolutePath());
@@ -77,9 +78,10 @@ public class SelectComicActivity extends Activity {
 
 	private void openDirectory(File file) {
 		currentDirectory = file;
-		editPreferences.putString("currentPath", file.getAbsolutePath());
-		editPreferences.commit();
-		new LoadComics().execute();
+
+		LoadComics loadComics = new LoadComics();
+		loadComics.setAbsolutePath(file.getAbsolutePath());
+		loadComics.execute();
 	}
 
 	private void openComic() {
@@ -122,20 +124,27 @@ public class SelectComicActivity extends Activity {
 	}
 
 	private class LoadComics extends AsyncTask<Object, Object, Object> {
+		String path;
+
+		public void setAbsolutePath(String path) {
+			this.path = path;
+		}
 
 		@Override
 		protected Object doInBackground(Object... params) {
+
 			try {
 				files = utils.getFiles(currentDirectory);
 			} catch (Exception e) {
 				currentDirectory = new File("/");
 				files = utils.getFiles(currentDirectory);
 			}
-			for (File f : files) {
-				if ((f != null) && (!f.isDirectory())) {
-					utils.getFirstImageFile(f); // Preload
-				}
-			}
+
+			// Do no preload
+			/*
+			 * for (File f : files) { if ((f != null) && (!f.isDirectory())) {
+			 * utils.getFirstImageFile(f); // Preload } }
+			 */
 
 			return null;
 		}
@@ -155,6 +164,11 @@ public class SelectComicActivity extends Activity {
 				gridView.setAdapter(new ComicAdapter(SelectComicActivity.this,
 						files, utils, preferences));
 			}
+
+			// Save path after the load has been made
+			editPreferences.putString("currentPath", path);
+			editPreferences.commit();
+
 			progressDialog.dismiss();
 		}
 
@@ -176,12 +190,28 @@ public class SelectComicActivity extends Activity {
 	public boolean onCreateOptionsMenu(Menu menu) {
 		MenuInflater inflater = getMenuInflater();
 		inflater.inflate(R.menu.menu_select_comic, menu);
+
+		boolean showFrontPages = preferences.getBoolean("showFrontPages", true);
+		menu.findItem(R.id.show_front_pages).setChecked(showFrontPages);
+
 		return true;
 	}
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-		Utils.saveFitPreferenceFromMenu(item, editPreferences);
+		int id = item.getItemId();
+		if (id == R.id.show_front_pages) {
+			boolean showFrontPages = !item.isChecked();
+			item.setChecked(showFrontPages);
+
+			editPreferences.putBoolean("showFrontPages", showFrontPages);
+			editPreferences.commit();
+
+			reloadFilesList();
+
+		} else {
+			Utils.saveFitPreferenceFromMenu(item, editPreferences);
+		}
 		return true;
 	}
 
