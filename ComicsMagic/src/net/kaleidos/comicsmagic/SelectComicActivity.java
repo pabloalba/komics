@@ -6,7 +6,9 @@ import java.util.ArrayList;
 import net.kaleidos.comicsmagic.adapter.ComicAdapter;
 import net.kaleidos.comicsmagic.helper.Utils;
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -17,7 +19,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.AdapterView.OnItemLongClickListener;
 import android.widget.GridView;
+import android.widget.Toast;
 
 public class SelectComicActivity extends Activity {
 
@@ -47,6 +51,15 @@ public class SelectComicActivity extends Activity {
 			}
 		});
 
+		gridView.setOnItemLongClickListener(new OnItemLongClickListener() {
+			@Override
+			public boolean onItemLongClick(AdapterView<?> parentView,
+					View childView, int position, long id) {
+				deleteComicDialog(position);
+				return true;
+			}
+		});
+
 		utils = new Utils(this);
 
 		preferences = getSharedPreferences("comicsMagic", MODE_PRIVATE);
@@ -63,6 +76,57 @@ public class SelectComicActivity extends Activity {
 		}
 		openDirectory(currentDirectory);
 
+	}
+
+	public void deleteComicDialog(final int position) {
+		File f = files.get(position);
+		AlertDialog.Builder alert = new AlertDialog.Builder(this);
+		alert.setTitle("Delete");
+		alert.setMessage("Do you want to delete " + f.getName() + "?");
+		alert.setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+			@Override
+			public void onClick(DialogInterface dialog, int whichButton) {
+				deleteComic(position);
+			}
+		});
+		alert.setNegativeButton("Cancel",
+				new DialogInterface.OnClickListener() {
+					@Override
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Canceled.
+					}
+				});
+		alert.show();
+	}
+
+	private void deleteComic(int number) {
+		File file = files.get(number);
+		String name = file.getName();
+		if (deleteFile(file)) {
+			files.remove(file);
+			reloadFilesList();
+			Toast.makeText(this, name + " has been deleted", Toast.LENGTH_SHORT)
+					.show();
+		} else {
+			Toast.makeText(this, "There was a problem deleting " + name,
+					Toast.LENGTH_SHORT).show();
+		}
+	}
+
+	public static boolean deleteFile(File file) {
+		if (file != null) {
+			if (file.isDirectory()) {
+				String[] children = file.list();
+				for (int i = 0; i < children.length; i++) {
+					boolean success = deleteFile(new File(file, children[i]));
+					if (!success) {
+						return false;
+					}
+				}
+			}
+			return file.delete();
+		}
+		return false;
 	}
 
 	private void iconClick(int number) {
