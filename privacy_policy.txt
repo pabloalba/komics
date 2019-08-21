@@ -1,0 +1,31 @@
+PRIVACY POLICY
+
+This privacy policy governs your use of the software application Comic Magic Reader ("Application") for mobile devices that was created by Pablo Alba.
+This privacy policy was last updated on August 21, 2019. 
+This privacy policy may change from time to time for any reason. If we make any material changes to our policies, we will place a prominent notice on our application listing on the playstore.
+If you have any questions or concerns about our privacy policies, feel free to contact us at any time.
+
+TLDR
+We do not store any data. Period.
+
+WHAT INFORMATION DOES THE APPLICATION OBTAIN AND HOW IS IT USED?
+The Application does not collect or transmit any data. This includes personally identifiable information about you, such as your name, address, phone number or email address.
+
+HOW DO YOU HANDLE LOCATION DATA?
+The Application does not collect, transmit, or maintain location data.
+
+CAN USERS SEE THEIR PERSONAL DATA?
+The Application does not collect, transmit, or maintain personal data.
+
+DO YOU SHARE PERSONAL INFORMATION?
+As no data is collected, transmitted, or maintained by the Application, we do not share personal information with anyone.
+
+DO ADVERTISING COMPANIES COLLECT DATA?
+The Application does not collect, transmit, or maintain any data. And it has no ads. So the answer is no.
+
+DO YOU USE VENDORS OR ANALYTICS PROVIDERS?
+No. The Application has no facility for collecting, transmitting, or maintaining user data, so no data is shared with vendors or analytics providers.
+
+DO YOU COMPLY WITH THE CHILDREN’S ONLINE PRIVACY PROTECTION ACT (COPPA) and the GDPR?
+Yes. We do not solicit nor gather any data from children under the age of 13. 
+If a parent or guardian becomes aware that his or her child has provided us with information without their consent, he or she should contact us.
